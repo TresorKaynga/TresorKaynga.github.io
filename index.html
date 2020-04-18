@@ -59,12 +59,22 @@
 				float: right;
 				margin-top: 5px;
 				position: absolute; 
-				right:33%; 
-				top:0px
+				right:20%; 
+				top:0px;
+				color:white;
+			}
+			div#divicon a{
+				color:white;
+				margin-left: 4px;
+			}
+			a#credit{
+				text-decoration: none;
+				padding-bottom: 3px;
 			}
 			div#divicon img{
 				width: 25px;
-				margin-left: 3px;
+				height: 23px;
+				margin-left: 5px;
 				
 			}
 			div#leftpart{
@@ -211,16 +221,18 @@
 				<div id="maintitle">
 					<a href="#" id="iconhome"><img src="image/home.png" alt=""></a>
 					<h2 style="width: 60%;">VISITE VIRTUELLE DE VNU</h2>
-					<div style="" id="divicon">
-						<a href="#" id="#"><img src="image/icone1.png" /></a>
-						<a href="#" id="#"><img src="image/vn.png" /></a>
-						<a href="#" id="#"><img src="image/icone2.png" /></a>
-						
+					<div id="divicon">
+						<img src="image/microff.png" id="micro"/>
+						<a href="#" id="#"><img src="image/iconmusic.png" /></a>
+						<img src="image/vn.png" id="langvn"/>
+						<img src="image/icone2.png" id="langen"/>
+						<img src="image/flagfr.png" id="langfr"/>
+						<a href="#" id="credit">Credit</a>						
 					</div>
 				</div>
 				
 				<div id="leftpart">
-					<p>
+					<p id="textfrvn">
 						Considéré comme un patrimoine colonial, l'Opéra de Hanoi est 
 						également un ouvrage monumental représentatif de l'interculturalité entre 
 						le Vietnam et la France. Au cours de plus d’un siècle d’une histoire parsemée 
@@ -265,6 +277,7 @@
 						accessStdVr();
 					}
 				</script>
+				<script src="js/script.js"></script>
 			</div>
 		    
 		</div>
