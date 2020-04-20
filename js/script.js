@@ -26,13 +26,13 @@ credit.addEventListener("click", function(){
 });
 
 micro.addEventListener("click", function(){
-    if(micro.src === "http://localhost/archive/image/microff.png"){
-        micro.src = "http://localhost/archive/image/micron.png";
-        document.getElementById("krpanoSWFObject").muted = true;
+   
+    if(micro.src === window.location.href + "/image/microff.png"){
+        micro.src = window.location.href + "/image/micron.png";
         comment.play();
     }
     else{
-        micro.src = "http://localhost/archive/image/microff.png";
+        micro.src = window.location.href + "/image/microff.png";
         comment.pause();
     }
 })
@@ -40,13 +40,13 @@ micro.addEventListener("mouseenter", function(){
     micro.style.cursor = "pointer";
 })
 musics.addEventListener("click", function(){
-    if(musics.src === "http://localhost/archive/image/iconmusic.png"){
-        musics.src = "http://localhost/archive/image/iconmusicoff.png";
+    if(musics.src === window.location.href + "/image/iconmusic.png"){
+        musics.src = window.location.href + "/image/iconmusicoff.png";
         audio.pause();
 
     }
     else{
-        musics.src = "http://localhost/archive/image/iconmusic.png";
+        musics.src = window.location.href + "/image/iconmusic.png";
         audio.play();
     }
 })
