@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <krpano>
 
-<!-- ************************ -->
-<!--         Messages         -->
-<!-- ************************ -->
 
   <data name="fr_project_title"><![CDATA[Test Insta360 titan]]></data>
   <data name="fr_project_author_name"><![CDATA[IFI]]></data>
 
 
 
-  <data name="fr_pano424_title"><![CDATA[PIC_20200413_162410_20200413164542]]></data>
+  <data name="fr_pano461_title"><![CDATA[Logo Animée IFI]]></data>
+
+
+  <data name="fr_pano424_title"><![CDATA[Entrée VNU]]></data>
   <data name="fr_spotpoint437_tooltip"><![CDATA[Direction IFI]]></data>
 
 
-  <data name="fr_pano423_title"><![CDATA[PIC_20200413_161928_20200413163709]]></data>
+  <data name="fr_pano423_title"><![CDATA[Direction IFI]]></data>
   <data name="fr_spotpoint454_tooltip"><![CDATA[Direction Entrée VNU]]></data>
 
 
-	<data name="fr_spotmap452_tooltip"><![CDATA[]]></data>
-	<data name="fr_spotmap453_tooltip"><![CDATA[]]></data>
+	<data name="fr_spotmap485_tooltip"><![CDATA[]]></data>
+	<data name="fr_spotmap486_tooltip"><![CDATA[]]></data>
 
 
 
@@ -36,12 +36,10 @@
   <data name="fr_controlBar_dockedThumbnailscloseFsTip"><![CDATA[Quitter le plein écran]]></data>
   <data name="fr_controlBar_dockedThumbnailsautorotateOnTip"><![CDATA[Démarrer l'Autorotation]]></data>
   <data name="fr_controlBar_dockedThumbnailsautorotateOffTip"><![CDATA[Arrêter l'Autorotation]]></data>
-  <data name="fr_controlBar_dockedThumbnailsdisplayHelpTip"><![CDATA[Afficher l'écran d'aide]]></data>
-  <data name="fr_controlBar_dockedThumbnailshideHelpTip"><![CDATA[Masquer l'écran d'aide]]></data>
-  <data name="fr_controlBar_dockedThumbnailsdisplayControlsTip"><![CDATA[Afficher les contrôles]]></data>
-  <data name="fr_controlBar_dockedThumbnailshideControlsTip"><![CDATA[Masquer les contrôles]]></data>
   <data name="fr_controlBar_dockedThumbnailsctrlmodeDragTip"><![CDATA[Changer le mode de navigation]]></data>
   <data name="fr_controlBar_dockedThumbnailsctrlmodeMoveTip"><![CDATA[Changer le mode de navigation]]></data>
+  <data name="fr_prevnexttheme8prevSceneTip"><![CDATA[Scène précédente]]></data>
+  <data name="fr_prevnexttheme8nextSceneTip"><![CDATA[Scène suivante]]></data>
   <data name="fr_logowebsiteurl"><![CDATA[http://www.ifi.vnu.edu.vn/fr/]]></data>
   <data name="fr_logotooltipText"><![CDATA[Ouvrir le site]]></data>
 
@@ -76,6 +74,9 @@
   <data name="fr_vr_setup_cb7"><![CDATA[Calibration réussie]]></data>
   <data name="fr_vr_setup_cb8"><![CDATA[Echec de la calibration]]></data>
   <data name="fr_vr_setup_unavailable"><![CDATA[Le mode VR[br]n&#39;est pas disponible sur cet appareil]]></data>
+
+
+
 
 
 

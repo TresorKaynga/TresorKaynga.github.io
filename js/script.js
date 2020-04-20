@@ -1,20 +1,57 @@
 var micro = document.getElementById("micro");
+var musics = document.getElementById("musics");
 var langvn = document.getElementById("langvn");
 var langfr = document.getElementById("langfr");
 var langen = document.getElementById("langen");
-
 var textfrvn = document.getElementById("textfrvn");
+var pano = document.getElementById("panoramique");
+var audio = document.getElementById("chanson");
+var comment = document.getElementById("comment");
+var credit = document.getElementById("credit");
+var divcredit = document.getElementById("divcredit");
+var topleft = document.getElementById("topleft");
+var bottonmleft = document.getElementById("bottonmleft");
+
+credit.addEventListener("click", function(){
+    if(divcredit.style.display === "none"){
+        topleft.style.display = "none";
+        bottonmleft.style.display = "none";
+        divcredit.style.display = "block";
+    }
+    else{
+        divcredit.style.display = "none";
+        topleft.style.display = "block";
+        bottonmleft.style.display = "block";   
+    }
+});
 
 micro.addEventListener("click", function(){
     if(micro.src === "http://localhost/archive/image/microff.png"){
         micro.src = "http://localhost/archive/image/micron.png";
+        document.getElementById("krpanoSWFObject").muted = true;
+        comment.play();
     }
     else{
         micro.src = "http://localhost/archive/image/microff.png";
+        comment.pause();
     }
 })
 micro.addEventListener("mouseenter", function(){
     micro.style.cursor = "pointer";
+})
+musics.addEventListener("click", function(){
+    if(musics.src === "http://localhost/archive/image/iconmusic.png"){
+        musics.src = "http://localhost/archive/image/iconmusicoff.png";
+        audio.pause();
+
+    }
+    else{
+        musics.src = "http://localhost/archive/image/iconmusic.png";
+        audio.play();
+    }
+})
+musics.addEventListener("mouseenter", function(){
+    musics.style.cursor = "pointer";
 })
 
 langvn.addEventListener("click", function(){
@@ -35,4 +72,4 @@ langen.addEventListener("click", function(){
 });
 langen.addEventListener("mouseenter", function(){
     langen.style.cursor = "pointer";
-})
+});

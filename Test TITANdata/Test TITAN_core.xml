@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <krpano>
-  <!-- Global variables used by actions and plugins -->
   <krpano 
-        tour_soundson="true" 
+        tour_soundson="false" 
         tour_soundsvolume="75" 
         tour_autotourenabled="false"
         tour_autorotateenabled="false"
@@ -29,7 +28,6 @@
     mul(stagescale,get(vrtourdevicescale));
   </action>
 
-  <!-- Control Mode Management -->
   <control mouse="drag" touch="drag" />
   <action name="setControlModeDragTo">setControlMode(drag);</action>
   <action name="setControlModeMoveTo">setControlMode(moveto);</action>
@@ -46,13 +44,11 @@
 
 
 
-  <!-- Tour Messages -->
   <action name="getmessage">
     txtadd(real_message_id, get(tour_language), "_", %2);
     set(%1, get(data[get(real_message_id)].content));
   </action>
 
-  <!-- Hide / Show Hotspots -->
   <action name="hideHotspots">
     set(tour_displayspots, false);
     set(nb_spots, get(hotspot.count));
@@ -107,17 +103,41 @@
       resetbackgroundsoundifneeded(%1);
 
 
+
+      stopdelayedcall(videointerface_videostart_call);
+      if(scene[get(xml.scene)].video AND scene[%1].video == false,
+        if(plugin[get(videointerface_video)],
+          if(plugin[get(videointerface_video)].videourl,
+            if(plugin[get(videointerface_video)].ispaused OR plugin[get(videointerface_video)].isautopaused,
+              plugin[get(videointerface_video)].seek(0);
+            ,
+              delayedcall(videointerface_video_call, get(plugin[get(videointerface_video)].delay),
+
+                plugin[get(videointerface_video)].stop();
+              );
+              set(plugin[get(videointerface_video)].delay, 0);
+            );
+          );
+
+          set(plugin[get(videointerface_video)].visible, false);
+      ););
       stopTourSoundsActions(true,true,true,false);
+      if(tour_soundson == true AND scene[%1].video == true AND plugin[get(videointerface_video)].volume == 0,
+        videointerface_change_sound();
+      );
+      
 
 
       loadscene(%1, get(projection_current_params), MERGE, get(ptblendmode));
 
 
 
+    ,
+
+      if(scene[%1].video,plugin[get(videointerface_video)].seek(0););
     );
   </action>
 
-  <!-- Load Previous Scene -->
   <action name="loadPreviousScene">
     if (%1 != findscene, sub(sceneprevnexti, scene.count, 1));
     copy(scenenamei, scene[get(sceneprevnexti)].name);
@@ -134,7 +154,6 @@
     );
   </action>
 
-  <!-- Load Next Scene -->
   <action name="loadNextScene">
     if (%1 != findscene, set(sceneprevnexti,0));
     copy(scenenamei, scene[get(sceneprevnexti)].name);
@@ -150,7 +169,6 @@
   </action>
 
 
-  <!-- AUTOROTATION -->
   <autorotate enabled="false"/>
   <krpano tour_autorotation_pausecounter="0"/>
   <krpano tour_autorotation_pauseplugin="0"/>
@@ -250,9 +268,8 @@
   </action>
 
 
-  <!-- AUTOTOUR -->
 
-  <krpano useautotourdelay="false" autotourdelay="5" autotourHorizontalStartValue="0" />
+  <krpano useautotourdelay="true" autotourdelay="20" autotourHorizontalStartValue="0" />
   <action name="startautotour">
     set(tour_autotourenabled, true);
 startautorotation();
@@ -264,28 +281,7 @@ startautorotation();
   </action>
   <action name="resetautotourvariables">
     stopautotourtimer();
-    if (scene[get(xml.scene)].planar,
-      set(autotourdelay, 10);
-      delayedcall(autotour_call_id, get(autotourdelay), autotourtimer);
-    ,
-      set(autotourHorizontalStartValue, get(view.hlookat));
-      if ((panoview.hmin == -180) AND (panoview.hmax == 180),
-        delayedcallAutotourFull360();
-      ,
-        set(previousStep, 0);
-        set(panoramaHorizontalSize, 0);
-        set(totalPartialSize, 0);
-        set(firstBorderSize, 0);
-        set(secondBorderSize, 0);
-        set(firstStep, 0);
-        set(firstStepTest, 0);
-        set(firstStepKeep, 0);
-        set(borderCounter, 0);
-        sub(panoramaHorizontalSize, get(panoview.hmax), get(panoview.hmin));
-        Math.abs(panoramaHorizontalSize);
-        delayedcallAutotourPartial();
-      );
-    );
+    delayedcall(autotour_call_id, get(autotourdelay), autotourtimer);
   </action>
   <action name="delayedcallAutotourPartial">
     sub(tempPosition, get(view.hlookat), get(autotourHorizontalStartValue));
@@ -349,7 +345,7 @@ stopautorotation();
   <action name="autotourtimer">
     if(tour_autotourenabled,
       if(tour_autorotateenabled,
-        if(autorotate.enabled,
+        if(autorotate.enabled OR useautotourdelay == true,
           stopautotour();loadNextScene();
 
           startautotour();
@@ -396,7 +392,6 @@ stopautorotation();
   </action>
 
 
-  <!-- Spot animation management -->
   <action name="animate">
     if (tour_stopsequence == false,
       if (stopspotsequence == false,
@@ -427,11 +422,9 @@ stopautorotation();
     );
   </action>
 
-  <!-- Disable the default fullscreen mode as it does a fullscreen only on the viewer not "on the tour" -->
+  
   <contextmenu fullscreen="false" versioninfo="false" />
 
-  <!-- Tooltips management -->
-<!-- Tooltip Management -->
 <krpano tooltipCurrentTextfieldLayer="panotourTooltipDefaultText" coretooltipmess=""/>
 
 <events name="showHideTooltipEvents" onremovepano="hideTooltip();" keep="true" />
@@ -677,7 +670,7 @@ stopautorotation();
 
 
 
-<!-- Default HTML5 tooltip style -->
+
 <layer name="panotourTooltipDefaultText"
 	keep="true"
 	enabled="false"
@@ -707,19 +700,264 @@ stopautorotation();
 
 
 
+<krpano videointerface_seekbar_update="" videointerface_controlbar_update="" videointerface_firstvideoscene="true" />
 
 
-  <!-- Keyboard management 
-  * use the keyboard +/- keys to zoom in/out
-  * use the keyboard CTRL+0 keys to reset the default panorama view
-  -->
+<events name="videointerface_start_events" devices="mobile.or.tablet" keep="true" 
+	onmousedown="videointerface_auto_start();"
+	onvideointerfaceinit="videointerface_auto_start_init();"
+	/>
+
+
+<action name="videointerface_auto_start_init">
+	set(events[videointerface_start_events].onmousedown, null);
+</action>
+
+
+<action name="videointerface_auto_start">
+	if(videointerface_autostart !== true,
+		ifnot(scene[get(xml.scene)].video,
+			if(plugin[get(videointerface_video)],
+			if(plugin[get(videointerface_video)].ispaused,
+				plugin[get(videointerface_video)].play();
+				delayedcall(0.1, plugin[get(videointerface_video)].pause(););
+				set(videointerface_autostart, true);
+				events.dispatch(onvideointerfaceinit);
+			););
+		);
+	);
+</action>
+
+
+<plugin name="ptvideosceneplayer"
+	url.flash="%SWFPATH%/graphics/videoplayer.swf"
+	url.html5="%FIRSTXML%/graphics/videoplayer.js"
+	width.no-panovideosupport.or.html5.and.ie.and.mobile="100%"
+	height.no-panovideosupport.or.html5.and.ie.and.mobile="prop"
+	onloaded="videointerface_setup_interface(get(name));"
+	onvideoready="videointerface_videoready();"
+
+	autoresume="true"
+	preferredformat.chrome="mp4"
+	preferredformat.firefox="webm"
+	preferredformat.safari="mp4"
+	preferredformat.ie="mp4"
+	preferredformat.edge="mp4"
+	buffertime="0.1"
+	volume="1.0"
+	pausedonstart="true"
+	loop="false"
+	onvideocomplete=""
+	enabled="false"
+	zorder="0"
+	visible="false"
+	panovideo="false"
+	align="center"
+	ox="0"
+	oy="0"
+	keep="true"
+	delay="0"
+	mute="false"
+	splashscreen="false"
+	/>
+
+
+<events name="videointerface_events" 
+	onremovepano="videointerface_close();" 
+	videointerfaceready="videointerface_open();" 
+	videointerfaceactivated="videointerface_update_pausestate();" 
+	changetoursoundsevent="videointerface_change_sound();" 
+	stoptoursoundsevent="videointerface_stop_sound();" 
+	playtoursoundsevent="videointerface_start_sound();" 
+	onplayvideointerface="videointerface_close_splashscreen();" 
+	keep="true" />
+
+
+
+<action name="videointerface_change_sound">
+	ifnot(plugin[get(videointerface_video)].mute,
+		div(volume, tour_soundsvolume, 100);
+		set(plugin[get(videointerface_video)].volume, get(volume));
+	);
+</action>
+<action name="videointerface_start_sound">
+	ifnot(plugin[get(videointerface_video)].mute,
+	if (tour_soundson,
+		ifnot(device.ios,
+			div(volume, tour_soundsvolume, 100);
+			set(plugin[get(videointerface_video)].volume, get(volume));
+		);
+	,
+		ifnot(device.ios,
+			set(plugin[get(videointerface_video)].volume, 0);
+		);
+	););
+</action>
+<action name="videointerface_stop_sound">
+	ifnot(plugin[get(videointerface_video)].mute,
+	ifnot(device.ios,
+		set(plugin[get(videointerface_video)].volume, 0);
+	););
+</action>
+
+
+<action name="videointerface_setup_interface">
+	set(videointerface_video, %1);
+
+
+	if(device.panovideosupport == false OR (device.html5 AND device.ie AND device.mobile),
+		set(plugin[get(videointerface_video)].panovideo, false);
+	,
+		set(plugin[get(videointerface_video)].panovideo, true);
+	);
+
+
+
+
+	ifnot(plugin[get(videointerface_video)].mute,
+		div(plugin[get(videointerface_video)].volume, tour_soundsvolume, 100);
+	);
+
+
+	set(plugin[get(videointerface_video)].onvideoplay, videointerface_update_pausestate() );
+	set(plugin[get(videointerface_video)].onvideopaused, videointerface_update_pausestate() );
+	
+	set(plugin[get(videointerface_video)].issetup, true);
+</action>
+
+
+<action name="videointerface_videoready">
+
+	events.dispatch(videointerfaceready);
+</action>
+
+
+<action name="videointerface_togglepause">
+	plugin[get(videointerface_video)].togglepause();
+</action>
+
+
+<action name="videointerface_play">
+	plugin[get(videointerface_video)].play();
+</action>
+<action name="videointerface_stop">
+	plugin[get(videointerface_video)].stop();
+</action>
+<action name="videointerface_resume">
+	plugin[get(videointerface_video)].play();
+</action>
+<action name="videointerface_pause">
+	plugin[get(videointerface_video)].pause();
+</action>
+<action name="videointerface_seek">
+	plugin[get(videointerface_video)].seek(%1);
+</action>
+
+
+<action name="videointerface_update_pausestate">
+	if(plugin[get(videointerface_video)].ispaused,
+		events.dispatch(onpausevideointerface);
+	,
+		events.dispatch(onplayvideointerface);
+	);
+</action>
+
+
+<action name="videointerface_open">
+	events.dispatch(openvideointerface);
+
+	videointerface_update_timer();
+
+	videointerface_open_splashscreen();
+</action>
+<action name="videointerface_close">
+	events.dispatch(closevideointerface);
+
+	videointerface_close_splashscreen();
+	stopdelayedcall(videointerface_timeupdate);
+</action>
+
+
+<action name="videointerface_open_splashscreen">
+	if(plugin[get(videointerface_video)].splashscreen,
+		set(layer[videointerface_splashscreen_image].visible, true);
+		tween(layer[videointerface_splashscreen_image].alpha, 1.0, 0.25, default);
+		set(plugin[get(videointerface_video)].splashscreen, false);
+	);
+</action>
+<action name="videointerface_close_splashscreen">
+	if(%1 === true,
+		set(hotspot[videointerface_splashscreen_image].alpha,0);
+		set(hotspot[videointerface_splashscreen_image].visible,false);
+	,
+		tween(layer[videointerface_splashscreen_image].alpha, 0.0, 0.25, default,set(layer[videointerface_splashscreen_image].visible,false););
+	);
+</action>
+
+
+
+<layer name="videointerface_splashscreen_image"
+	url="%FIRSTXML%/graphics/videoplayer_play_button.png"
+	visible="false"
+	alpha="0.0"
+	align="center"
+	width="100"
+	height="100"
+	zorder="98"
+	scale="0.8"
+	keep="true"
+	onclick="if(plugin[get(videointerface_video)].isvideoready, videointerface_togglepause();videointerface_close_splashscreen(););"
+	/>
+
+
+<action name="videointerface_update_timer">
+
+	set(videointerface_update_timer_loop, true);
+	if(videointerface_seekbar_update OR videointerface_controlbar_update,
+		copy(vp, plugin[get(videointerface_video)]);
+		if(vp AND vp.loaded AND vp.isvideoready AND vp.isseeking == false,
+			copy(t1, vp.time);
+			copy(t2, vp.totaltime);
+			if(t2 GT 0, div(t3, t1, t2), set(t3,0));
+			copy(l1, vp.loadedbytes);
+			copy(l2, vp.totalbytes);
+			if(l2 GT 0, div(l3, l1, l2), set(l3,0));
+			mul(l3, 100);
+			txtadd(l3_percent, get(l3), '%%');
+			mul(t3, 100);
+			txtadd(t3_percent, get(t3), '%%');
+
+
+			if(videointerface_seekbar_update,
+				txtadd(videointerface_seekbar_update_timer,get(videointerface_seekbar_update),'(',t1,',',t2,',',l3_percent,',',t3_percent,');');
+				callwith(plugin[get(videointerface_video)], videointerface_seekbar_update_timer);
+			);
+			if(videointerface_controlbar_update,
+				txtadd(videointerface_controlbar_update_timer,get(videointerface_controlbar_update),'(',t1,',',t2,',',l3_percent,',',t3_percent,');');
+				callwith(plugin[get(videointerface_video)], videointerface_controlbar_update_timer);
+			);
+		);
+		delete(vp);
+	,
+		set(videointerface_update_timer_loop, false);
+	);
+
+
+	if(videointerface_update_timer_loop == true,
+		stopdelayedcall(videointerface_timeupdate);
+		delayedcall(videointerface_timeupdate, 0.25, videointerface_update_timer() );
+	);
+</action>
+
+
+
+
   <control keycodesin="107,187" keycodesout="109,189" />
   <krpano tour_ctrlPressed="false"/>
   <events name="keycontrolZoomEvents" onkeydown="onKDZ" onkeyup="onKUZ" keep="true"/>
   <action name="onKDZ">if(keycode==17,set(tour_ctrlPressed,true);,if(tour_ctrlPressed==true,if(keycode==96,hideTooltip();lookto(get(panoview.h),get(panoview.v),get(panoview.fov)););););</action>
   <action name="onKUZ">if(keycode==17,set(tour_ctrlPressed,false););</action>
 
-  <!-- Indicate if a scene is seen or not - dispatch an event if the state is changed -->
   <events name="sceneSeenEvents" onnewpano="changeSeenState" keep="true"/>
   <action name="changeSeenState">
     ifnot (scene[get(xml.scene)].seen,

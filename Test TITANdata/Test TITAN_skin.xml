@@ -2,7 +2,6 @@
 <krpano version="1.19">
 
     
-  <!-- Spot Style - Default Point Spot Style -->
   <style name="IconDefaultPointSpotStyle"
          url="%FIRSTXML%/spots/hotspot_animated_user_defaultpoint0.png"
          visible="false"
@@ -42,13 +41,9 @@ resumeautorotation(forcehotspot);
 
 
 
-  <!-- unsupported kind of display : PointMap -->
+  
 
 
-<!-- ********** -->
-<!-- Barre de contrôle avec miniatures -->
-<!-- id : controlBar_dockedThumbnails -->
-<!-- ********** -->
 
 <krpano controlBar_dockedThumbnailsbarbuilt="false" controlBar_dockedThumbnailsIsOpened="false" controlBar_dockedThumbnailsThumbnailsPos="0" />
 
@@ -66,11 +61,6 @@ resumeautorotation(forcehotspot);
 </action>
 
 
-<!-- ********** -->
-<!-- Thumbnails Bar part of -->
-<!-- Barre de contrôle avec miniatures -->
-<!-- id : controlBar_dockedThumbnails -->
-<!-- ********** -->
 
 
 
@@ -1025,18 +1015,7 @@ resumeautorotation(forcehotspot);
 <action name="controlBar_dockedThumbnailsbuildMenu">
 	
     set(controlBar_dockedThumbnailsbutton_pos, 0);
-    set(layer[controlBar_dockedThumbnailsbtn_hidecontrols].x, get(controlBar_dockedThumbnailsbutton_pos));
-    set(layer[controlBar_dockedThumbnailsbtn_hidecontrols_bg].x, get(controlBar_dockedThumbnailsbutton_pos));
-    inc(controlBar_dockedThumbnailsbutton_pos, 36);
 
-
-      if (device.desktop,
-        set(layer[controlBar_dockedThumbnailsbtn_display_help].x, get(controlBar_dockedThumbnailsbutton_pos));
-        set(layer[controlBar_dockedThumbnailsbtn_display_help_bg].x, get(controlBar_dockedThumbnailsbutton_pos));
-        set(layer[controlBar_dockedThumbnailsbtn_close_help].x  , get(controlBar_dockedThumbnailsbutton_pos));
-        set(layer[controlBar_dockedThumbnailsbtn_close_help_bg].x  , get(controlBar_dockedThumbnailsbutton_pos));
-        inc(controlBar_dockedThumbnailsbutton_pos, 36);
-      );
 
       if (device.fullscreensupport,
         set(layer[controlBar_dockedThumbnailsbtn_openfs].x, get(controlBar_dockedThumbnailsbutton_pos));
@@ -1479,74 +1458,12 @@ resumeautorotation(forcehotspot);
 
 
 
-    <layer name="controlBar_dockedThumbnailsbtn_display_help_bg" style="controlBar_dockedThumbnails_btn_style_bg" visible="false" devices="desktop" />
-    <layer name="controlBar_dockedThumbnailsbtn_display_help"
-           url="%FIRSTXML%/graphics/dockedthumbscontrolbar/btn_help.png"
-           onclick="controlBar_dockedThumbnailsdisplayHelp();"
-           style="controlBar_dockedThumbnails_btn_style"
-           tooltip="controlBar_dockedThumbnailsdisplayHelpTip"
-           devices="desktop"
-           visible="false"
-           />
-    <layer name="controlBar_dockedThumbnailsbtn_close_help_bg" style="controlBar_dockedThumbnails_btn_style_on_bg" visible="false" devices="desktop"/>
-    <layer name="controlBar_dockedThumbnailsbtn_close_help"
-           url="%FIRSTXML%/graphics/dockedthumbscontrolbar/btn_help.png"
-           onclick="controlBar_dockedThumbnailscloseHelp();"
-           style="controlBar_dockedThumbnails_btn_style_on"
-           visible="false"
-           tooltip="controlBar_dockedThumbnailshideHelpTip"
-           devices="desktop"
-           />
 
-
-
-    <layer name="controlBar_dockedThumbnailsbtn_hidecontrols_bg" style="controlBar_dockedThumbnails_btn_style_bg" visible="false" />
-    <layer name="controlBar_dockedThumbnailsbtn_hidecontrols"
-           url="%FIRSTXML%/graphics/dockedthumbscontrolbar/btn_hide_controls.png"
-           style="controlBar_dockedThumbnails_btn_style"
-           onclick="controlBar_dockedThumbnailshideMenuControls();hideTourControls();
-"
-           visible="false"
-            tooltip="controlBar_dockedThumbnailshideControlsTip"
-           />
-
-    <layer name="controlBar_dockedThumbnailsbtn_showcontrols"
-                  crop="0| 0|48|48"
-            onovercrop="0|48|48|48"
-            ondowncrop="0|96|48|48"
-            keep="true"
-            url="%FIRSTXML%/graphics/dockedthumbscontrolbar/btn_show_controls_bg.png"
-            align="bottomright"
-            zorder="1"
-            height="36"
-            width="36"
-            visible="false"
-            y="12"
-            x="0" >
-    <layer name="controlBar_dockedThumbnailsbtn_showcontrols_fg"
-                  crop="0| 0|48|48"
-            onovercrop="0|48|48|48"
-            ondowncrop="0|96|48|48"
-            onclick="controlBar_dockedThumbnailsshowMenuControls();showTourControls();
-"
-            onhover="showTooltip('plugin',controlBar_dockedThumbnailsmenuTooltipStyle);"
-            onout="hideTooltip();"
-            tooltip="controlBar_dockedThumbnailsdisplayControlsTip"
-            keep="true"
-            url="%FIRSTXML%/graphics/dockedthumbscontrolbar/btn_show_controls.png"
-            align="center"
-            height="36"
-            width="36"
-            />
-    </layer>
 
 
 <action name="controlBar_dockedThumbnailshideMenuControls">
 	set(controlBar_dockedThumbnailsIsOpened, false);
 	set(layer[controlBar_dockedThumbnails_bg].visible, false);
-	set(layer[controlBar_dockedThumbnailsbtn_showcontrols].visible, true);
-	set(layer[controlBar_dockedThumbnailsbtn_hidecontrols_bg].visible, false);
-	set(layer[controlBar_dockedThumbnailsbtn_hidecontrols].visible, false);
 	set(layer[controlBar_dockedThumbnailsbtn_in_bg].visible, false);
 	set(layer[controlBar_dockedThumbnailsbtn_out_bg].visible, false);
 	set(layer[controlBar_dockedThumbnailsbtn_in].visible, false);
@@ -1570,7 +1487,6 @@ resumeautorotation(forcehotspot);
 
 		controlBar_dockedThumbnailsupdateControlModeButtons();
 		controlBar_dockedThumbnailsupdateFullscreenButtons();
-		controlBar_dockedThumbnailsupdateHelpButtons();
 </action>
 <action name="controlBar_dockedThumbnailsshowMenuControls">
 	set(controlBar_dockedThumbnailsIsOpened, true);
@@ -1579,11 +1495,7 @@ resumeautorotation(forcehotspot);
 
 
       controlBar_dockedThumbnailsupdateControlModeButtons();
-      controlBar_dockedThumbnailsupdateHelpButtons();
       set(layer[controlBar_dockedThumbnails_bg].visible, true);
-	set(layer[controlBar_dockedThumbnailsbtn_showcontrols].visible, false);
-	set(layer[controlBar_dockedThumbnailsbtn_hidecontrols_bg].visible, true);
-	set(layer[controlBar_dockedThumbnailsbtn_hidecontrols].visible, true);
 	set(layer[controlBar_dockedThumbnailsbtn_in_bg].visible, true);
 	set(layer[controlBar_dockedThumbnailsbtn_out_bg].visible, true);
 	set(layer[controlBar_dockedThumbnailsbtn_in].visible, true);
@@ -1607,64 +1519,6 @@ resumeautorotation(forcehotspot);
 		controlBar_dockedThumbnailsUpdateThumbnailsSize();
 </action>
 
-
-    <layer name="controlBar_dockedThumbnailshelpScreenBg" align="center" keep="true" onclick="controlBar_dockedThumbnailscloseHelp();"
-           url="%FIRSTXML%/graphics/dockedthumbscontrolbar/help_screen_bg.png"
-           visible="false"
-           zorder="97"
-           >
-      <layer name="controlBar_dockedThumbnailshelpScreen" align="center" keep="true" onclick="controlBar_dockedThumbnailscloseHelp();" 
-             url="%FIRSTXML%/graphics/dockedthumbscontrolbar/help_screen_fg.png"
-             height="100%" 
-             width="prop" 
-             displayed="false"
-             />
-    </layer>
-    <action name="controlBar_dockedThumbnailsdisplayHelp">
-      if (device.desktop,
-        set(layer[controlBar_dockedThumbnailshelpScreen].displayed, true);
-        set(layer[controlBar_dockedThumbnailshelpScreenBg].visible,true);
-        controlBar_dockedThumbnailsupdateHelpButtons();
-      );
-    </action>
-    <action name="controlBar_dockedThumbnailscloseHelp">
-      if (device.desktop,
-        set(layer[controlBar_dockedThumbnailshelpScreen].displayed, false);
-        set(layer[controlBar_dockedThumbnailshelpScreenBg].visible,false);
-        controlBar_dockedThumbnailsupdateHelpButtons();
-      );
-    </action>
-	<action name="controlBar_dockedThumbnailsHideHelpButtons">
-		set(layer[controlBar_dockedThumbnailsbtn_display_help].visible, false);
-		set(layer[controlBar_dockedThumbnailsbtn_close_help].visible, false);
-		set(layer[controlBar_dockedThumbnailsbtn_display_help_bg].visible, false);
-		set(layer[controlBar_dockedThumbnailsbtn_close_help_bg].visible, false);
-	</action>
-	<action name="controlBar_dockedThumbnailsShowHelpButtons">
-		if (layer[controlBar_dockedThumbnailshelpScreen].displayed,
-			set(layer[controlBar_dockedThumbnailsbtn_close_help].visible, true);
-			set(layer[controlBar_dockedThumbnailsbtn_display_help].visible, false);
-			set(layer[controlBar_dockedThumbnailsbtn_close_help_bg].visible, true);
-			set(layer[controlBar_dockedThumbnailsbtn_display_help_bg].visible, false);
-		,
-			set(layer[controlBar_dockedThumbnailsbtn_display_help].visible, true);
-			set(layer[controlBar_dockedThumbnailsbtn_close_help].visible, false);
-			set(layer[controlBar_dockedThumbnailsbtn_display_help_bg].visible, true);
-			set(layer[controlBar_dockedThumbnailsbtn_close_help_bg].visible, false);
-		);
-	</action>
-	<action name="controlBar_dockedThumbnailsupdateHelpButtons">
-	if (device.desktop,
-		if (controlBar_dockedThumbnailsIsOpened,
-			controlBar_dockedThumbnailsShowHelpButtons();
-		,
-			controlBar_dockedThumbnailsHideHelpButtons();
-		);
-	,
-		controlBar_dockedThumbnailsHideHelpButtons();
-	);
-	</action>
-    
 
 
 	<events name="controlBar_dockedThumbnailsmenufullscreenchangeevent"
@@ -1761,14 +1615,68 @@ resumeautorotation(forcehotspot);
 
 
 
-<!-- ********** -->
-<!-- Logo -->
-<!-- id : logo -->
-<!-- ********** -->
+
+  <style name="prevnexttheme8ArrowStyle" keep="true" x="10" alpha="0.5"
+               crop="0| 0|38|38"
+         onovercrop="0|38|38|38"
+         ondowncrop="0|76|38|38"
+         />
+  <layer name="prevnexttheme8prevPanoramaArrow" style="prevnexttheme8ArrowStyle"
+         url="%FIRSTXML%/graphics/prevnextdots/btn_scroll_left.png" align="left" 
+         tooltip="prevnexttheme8prevSceneTip"
+         onhover="set(alpha, 1);showTooltip('plugin',prevnexttheme8TooltipStyle,left);"
+         onout="set(alpha, 0.5);hideTooltip();"
+         onclick="loadPreviousScene();
+"
+         visible="false"
+         zorder="2" />
+
+  <layer name="prevnexttheme8nextPanoramaArrow" style="prevnexttheme8ArrowStyle"
+         url="%FIRSTXML%/graphics/prevnextdots/btn_scroll_right.png" align="right"
+         tooltip="prevnexttheme8nextSceneTip"
+         onhover="set(alpha, 1);showTooltip('plugin',prevnexttheme8TooltipStyle,right);"
+         onout="set(alpha, 0.5);hideTooltip();"
+         onclick="loadNextScene();
+"
+         visible="false"
+         zorder="2" />
+
+  <events name="prevnexttheme8hideshowcontrolsevent" 
+    onTourStart="prevnexttheme8showPrevNextControls();"
+    keep="true"/>
+  <action name="prevnexttheme8hidePrevNextControls">
+    set(layer[prevnexttheme8prevPanoramaArrow].visible, false);
+    set(layer[prevnexttheme8nextPanoramaArrow].visible, false);
+  </action>
+  <action name="prevnexttheme8showPrevNextControls">
+    set(layer[prevnexttheme8prevPanoramaArrow].visible, true);
+    set(layer[prevnexttheme8nextPanoramaArrow].visible, true);
+  </action>
+
+<layer name="prevnexttheme8TooltipStyle"
+	keep="true"
+	enabled="false"
+	capture="false"
+	url="%FIRSTXML%/graphics/textfield.swf"
+	align="center"
+	background="false"
+	border="false"
+	css="color:#ffffff;font-family:Helvetica;font-size:14px;text-align:left;"
+	height="20"
+	autoheight="true"
+	autowidth="auto"
+	selectable="false"
+	zorder="0"
+	padding="2"
+	xoffset="0"
+	yoffset="0"
+	visible="false"
+	html=""
+/>
+
 
   <hotspot ath="0" atv="90"
          zorder="0"
-         zoom="true"
          name="logo"
          keep="true"
          visible="false"
@@ -1806,7 +1714,6 @@ getmessage(urltoopen,logowebsiteurl);openurl(get(urltoopen),_blank);
 	capture="false"
 	url="%FIRSTXML%/graphics/textfield.swf"
 	align="center"
-	roundedge="3"
 	background="true"
 	backgroundcolor="0x2c87a3"
 	backgroundalpha="0.80000000000000004"
@@ -1824,6 +1731,17 @@ getmessage(urltoopen,logowebsiteurl);openurl(get(urltoopen),_blank);
 	visible="false"
 	html=""
 />
+
+  <action name="exitFullScreen" devices="fullscreensupport">set(tour_fullscreen,false);set(fullscreen,false);</action>
+  <action name="enterFullScreen" devices="fullscreensupport">set(tour_fullscreen,true);set(fullscreen,true);</action>
+  <action name="switchFullScreen">if(tour_fullscreen,exitFullScreen();,enterFullScreen(););</action>
+
+  
+  <events name="krpanoExitFullscreenEvent"
+    onexitfullscreen="if(tour_fullscreen,exitFullScreenChangeEvent(););"
+    keep="true" />
+
+  <action name="exitFullScreenChangeEvent" devices="fullscreensupport">set(tour_fullscreen,false);events.dispatch(onexitfullscreen);</action>
 
 <action name="viewControlMoveUp">
 	if(%1,
@@ -1965,24 +1883,6 @@ getmessage(urltoopen,logowebsiteurl);openurl(get(urltoopen),_blank);
 	set(fov_moveforce, 0);
 </action>
 
-  <!-- Hide / Show Controls -->
-  <action name="hideTourControls">set(tour_displaycontrols, false);events.dispatch(hidetourcontrols);</action>
-  <action name="showTourControls">set(tour_displaycontrols, true); events.dispatch(showtourcontrols);</action>
-
-
-  <!-- Fullscreen Management -->
-  <action name="exitFullScreen" devices="fullscreensupport">set(tour_fullscreen,false);set(fullscreen,false);</action>
-  <action name="enterFullScreen" devices="fullscreensupport">set(tour_fullscreen,true);set(fullscreen,true);</action>
-  <action name="switchFullScreen">if(tour_fullscreen,exitFullScreen();,enterFullScreen(););</action>
-
-  
-  <events name="krpanoExitFullscreenEvent"
-    onexitfullscreen="if(tour_fullscreen,exitFullScreenChangeEvent(););"
-    keep="true" />
-
-  <action name="exitFullScreenChangeEvent" devices="fullscreensupport">set(tour_fullscreen,false);events.dispatch(onexitfullscreen);</action>
-
-  <!-- Sounds Management -->
   <plugin name="soundinterface"
           preload="true"
           url="%SWFPATH%/graphics/soundinterface.swf"
@@ -2156,7 +2056,7 @@ getmessage(urltoopen,logowebsiteurl);openurl(get(urltoopen),_blank);
         );
       );
     );
-    
+    pauseVideoSceneSound();
   </action>
   <action name="resumebackgroundsound">
     set(bgSoundOnResume, true);
@@ -2201,16 +2101,25 @@ getmessage(urltoopen,logowebsiteurl);openurl(get(urltoopen),_blank);
           );
         );
       );
-      
+      resumeVideoSceneSound();
     ,
       if(forceBgSoundOnResume,
         playbackgroundsound();
-        
+        resumeVideoSceneSound();
       );
     );
   </action>
+  <action name="resumeVideoSceneSound">
+    if(scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == false,
+      videointerface_start_sound();
+    );
+  </action>
+  <action name="pauseVideoSceneSound">
+    if(scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == false,
+      videointerface_stop_sound();
+    );
+  </action>
   <action name="preloadSounds">
-    preloadsound("cheo-chant_traditionnel_du_vietnam.mp3");
   </action>
 
   <action name="play3DLocalSounds">

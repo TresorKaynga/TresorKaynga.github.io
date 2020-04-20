@@ -2,7 +2,6 @@
 <krpano version="1.19">
 
     
-  <!-- Spot Style - Default Point Spot Style -->
   <style name="IconDefaultPointSpotStyle"
          url="%FIRSTXML%/spots/hotspot_animated_user_defaultpoint0.png"
          visible="false"
@@ -42,8 +41,19 @@ resumeautorotation(forcehotspot);
 
 
 
-  <!-- unsupported kind of display : PointMap -->
+  
 
+
+  <action name="exitFullScreen" devices="fullscreensupport">set(tour_fullscreen,false);set(fullscreen,false);</action>
+  <action name="enterFullScreen" devices="fullscreensupport">set(tour_fullscreen,true);set(fullscreen,true);</action>
+  <action name="switchFullScreen">if(tour_fullscreen,exitFullScreen();,enterFullScreen(););</action>
+
+  
+  <events name="krpanoExitFullscreenEvent"
+    onexitfullscreen="if(tour_fullscreen,exitFullScreenChangeEvent(););"
+    keep="true" />
+
+  <action name="exitFullScreenChangeEvent" devices="fullscreensupport">set(tour_fullscreen,false);events.dispatch(onexitfullscreen);</action>
 
 <action name="viewControlMoveUp">
 	if(%1,
@@ -185,24 +195,6 @@ resumeautorotation(forcehotspot);
 	set(fov_moveforce, 0);
 </action>
 
-  <!-- Hide / Show Controls -->
-  <action name="hideTourControls">set(tour_displaycontrols, false);events.dispatch(hidetourcontrols);</action>
-  <action name="showTourControls">set(tour_displaycontrols, true); events.dispatch(showtourcontrols);</action>
-
-
-  <!-- Fullscreen Management -->
-  <action name="exitFullScreen" devices="fullscreensupport">set(tour_fullscreen,false);set(fullscreen,false);</action>
-  <action name="enterFullScreen" devices="fullscreensupport">set(tour_fullscreen,true);set(fullscreen,true);</action>
-  <action name="switchFullScreen">if(tour_fullscreen,exitFullScreen();,enterFullScreen(););</action>
-
-  
-  <events name="krpanoExitFullscreenEvent"
-    onexitfullscreen="if(tour_fullscreen,exitFullScreenChangeEvent(););"
-    keep="true" />
-
-  <action name="exitFullScreenChangeEvent" devices="fullscreensupport">set(tour_fullscreen,false);events.dispatch(onexitfullscreen);</action>
-
-  <!-- Sounds Management -->
   <plugin name="soundinterface"
           preload="true"
           url="%SWFPATH%/graphics/soundinterface.swf"
@@ -376,7 +368,7 @@ resumeautorotation(forcehotspot);
         );
       );
     );
-    
+    pauseVideoSceneSound();
   </action>
   <action name="resumebackgroundsound">
     set(bgSoundOnResume, true);
@@ -421,16 +413,25 @@ resumeautorotation(forcehotspot);
           );
         );
       );
-      
+      resumeVideoSceneSound();
     ,
       if(forceBgSoundOnResume,
         playbackgroundsound();
-        
+        resumeVideoSceneSound();
       );
     );
   </action>
+  <action name="resumeVideoSceneSound">
+    if(scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == false,
+      videointerface_start_sound();
+    );
+  </action>
+  <action name="pauseVideoSceneSound">
+    if(scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == false,
+      videointerface_stop_sound();
+    );
+  </action>
   <action name="preloadSounds">
-    preloadsound("cheo-chant_traditionnel_du_vietnam.mp3");
   </action>
 
   <action name="play3DLocalSounds">
