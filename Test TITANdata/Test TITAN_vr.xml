@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<krpano version="1.19"
+<krpano version="1.19-pr16"
         onstart="startup"
         logkey="false"
         bgcolor="#ffffff"
@@ -21,14 +21,25 @@
   <include url="%FIRSTXML%/Test TITAN_skin_vr.xml"/>
   <include url="%FIRSTXML%/Test TITAN_core_vr.xml"/>
   <include url="%FIRSTXML%/Test TITAN_messages_fr.xml"/>
+  <include url="%FIRSTXML%/Test TITAN_messages_en.xml"/>
+  <include url="%FIRSTXML%/Test TITAN_messages_vn.xml"/>
 
   <action name="startup">
     preloadSounds();
 
-    if (s !== null, if (startscene === null, set(startscene, get(s));); );
-    if (startscene === null,
+    if (s !== null, if (startscene === null OR startscene === "undefined", set(startscene, get(s));); );
+    if (startscene === null OR startscene === "undefined",
       set(startscene, pano424);
     );
+    if(startlanguage !== null AND startlanguage !== "undefined",
+      set(tour_language, get(startlanguage));
+    );
+    if(starttime !== null AND starttime !== "undefined" AND starttime GT 0,
+      set(videoscenestarttime, get(starttime));
+    ,
+      set(videoscenestarttime, 0);
+    );
+    if(scene[get(startscene)].full360,
     mainloadsceneStartup(get(startscene));
     if (h !== null,
       if (v !== null,
@@ -57,6 +68,7 @@
         );
       );
     );
+    );
   </action>
 
 
@@ -65,11 +77,8 @@
 
 
 
-
-
   
   
-
 
 
 <scene name="pano424"
@@ -89,12 +98,8 @@
        full360="true"
        video="false"
        seen="false">
-
-    <autorotate horizon="0.443350" tofov="85.000000" waittime="1" speed="-8"/>
-
-
+    <autorotate horizon="0.443350" tofov="85.000000" waittime="1" speed="10"/>
     <panoview h="-114.163000" v="0.443350" fov="85.000000" hmin="-180" hmax="180" vmin="-90" vmax="90" fovmax="90" />
-
     <view fisheye="0"
           limitview="range"
           hlookatmin="-180"
@@ -107,10 +112,7 @@
           fov="85.000000"
           hlookat="-114.163000"
           vlookat="0.443350"/>
-
     <preview url="%FIRSTXML%/pic_20200413_162410__424/preview.jpg" type="CUBESTRIP" striporder="FRBLUD" />
-
-
     <image type="CUBE" multires="true" baseindex="0" tilesize="512" devices="!androidstock|webgl">
       <level tiledimagewidth="3584" tiledimageheight="3584">
           <front url="pic_20200413_162410__424/0/2/%v_%u.jpg"/>
@@ -137,18 +139,14 @@
           <down  url="pic_20200413_162410__424/5/0/%v_%u.jpg"/>
       </level>
     </image>
-      <image type="CUBE" devices="androidstock.and.no-webgl">
-        <front url="pic_20200413_162410__424/mobile/0.jpg"/>
-        <right url="pic_20200413_162410__424/mobile/1.jpg"/>
-        <back  url="pic_20200413_162410__424/mobile/2.jpg"/>
-        <left  url="pic_20200413_162410__424/mobile/3.jpg"/>
-        <up    url="pic_20200413_162410__424/mobile/4.jpg"/>
-        <down  url="pic_20200413_162410__424/mobile/5.jpg"/>
-      </image>
-
-
-
-
+    <image type="CUBE" devices="androidstock.and.no-webgl">
+      <front url="pic_20200413_162410__424/mobile/0.jpg"/>
+      <right url="pic_20200413_162410__424/mobile/1.jpg"/>
+      <back  url="pic_20200413_162410__424/mobile/2.jpg"/>
+      <left  url="pic_20200413_162410__424/mobile/3.jpg"/>
+      <up    url="pic_20200413_162410__424/mobile/4.jpg"/>
+      <down  url="pic_20200413_162410__424/mobile/5.jpg"/>
+    </image>
 
 
 
@@ -165,6 +163,7 @@
            distorted="true"
            depth="1000"
            descriptionid=""
+           linktarget="pano423"
            onclick="onclickspotpoint437"
            tooltip="spotpoint437_tooltip"
            />
@@ -180,10 +179,17 @@
 
 
   <action name="hidepanopointspots">
+
+
+
     set(hotspot[spotpoint437].visible, false);
   </action>
   <action name="showpanopointspots">
-    set(hotspot[spotpoint437].visible, true);
+
+
+
+  
+  set(hotspot[spotpoint437].visible, true);
   </action>
   <events name="pano424stopanimatedspots" onremovepano="stopspotanimation(spotpoint437);" />
 
@@ -192,39 +198,18 @@
     resumeTourSoundsActions(true,false,false,false,true);
     if (tour_displayspots,
     showpanopointspots();
-
-
-
-
     );
   </action>
   <action name="hidepanospotsaction">
     pauseTourSoundsActions(true,false,false,false,true);
     hidepanopointspots();
-
-
-
-
-  </action>
-
-  <action name="setzorder2onstandardspots">
-    if (device.html5,
-      ifnot (device.desktop,
-
-
-        set(hotspot[spotpoint437].zorder2, %1);
-
-      );
-    );
   </action>
 
 
 </scene>
 
-
   
   
-
 
 
 <scene name="pano423"
@@ -244,12 +229,8 @@
        full360="true"
        video="false"
        seen="false">
-
-    <autorotate horizon="0.000000" tofov="85.000000" waittime="1" speed="-8"/>
-
-
+    <autorotate horizon="0.000000" tofov="85.000000" waittime="1" speed="10"/>
     <panoview h="0.000000" v="0.000000" fov="85.000000" hmin="-180" hmax="180" vmin="-90" vmax="90" fovmax="90" />
-
     <view fisheye="0"
           limitview="range"
           hlookatmin="-180"
@@ -262,10 +243,7 @@
           fov="85.000000"
           hlookat="0.000000"
           vlookat="0.000000"/>
-
     <preview url="%FIRSTXML%/pic_20200413_161928__423/preview.jpg" type="CUBESTRIP" striporder="FRBLUD" />
-
-
     <image type="CUBE" multires="true" baseindex="0" tilesize="512" devices="!androidstock|webgl">
       <level tiledimagewidth="3584" tiledimageheight="3584">
           <front url="pic_20200413_161928__423/0/2/%v_%u.jpg"/>
@@ -292,18 +270,14 @@
           <down  url="pic_20200413_161928__423/5/0/%v_%u.jpg"/>
       </level>
     </image>
-      <image type="CUBE" devices="androidstock.and.no-webgl">
-        <front url="pic_20200413_161928__423/mobile/0.jpg"/>
-        <right url="pic_20200413_161928__423/mobile/1.jpg"/>
-        <back  url="pic_20200413_161928__423/mobile/2.jpg"/>
-        <left  url="pic_20200413_161928__423/mobile/3.jpg"/>
-        <up    url="pic_20200413_161928__423/mobile/4.jpg"/>
-        <down  url="pic_20200413_161928__423/mobile/5.jpg"/>
-      </image>
-
-
-
-
+    <image type="CUBE" devices="androidstock.and.no-webgl">
+      <front url="pic_20200413_161928__423/mobile/0.jpg"/>
+      <right url="pic_20200413_161928__423/mobile/1.jpg"/>
+      <back  url="pic_20200413_161928__423/mobile/2.jpg"/>
+      <left  url="pic_20200413_161928__423/mobile/3.jpg"/>
+      <up    url="pic_20200413_161928__423/mobile/4.jpg"/>
+      <down  url="pic_20200413_161928__423/mobile/5.jpg"/>
+    </image>
 
 
 
@@ -320,6 +294,7 @@
            distorted="true"
            depth="1000"
            descriptionid=""
+           linktarget="pano424"
            onclick="onclickspotpoint454"
            tooltip="spotpoint454_tooltip"
            />
@@ -335,10 +310,17 @@
 
 
   <action name="hidepanopointspots">
+
+
+
     set(hotspot[spotpoint454].visible, false);
   </action>
   <action name="showpanopointspots">
-    set(hotspot[spotpoint454].visible, true);
+
+
+
+  
+  set(hotspot[spotpoint454].visible, true);
   </action>
   <events name="pano423stopanimatedspots" onremovepano="stopspotanimation(spotpoint454);" />
 
@@ -347,35 +329,15 @@
     resumeTourSoundsActions(true,false,false,false,true);
     if (tour_displayspots,
     showpanopointspots();
-
-
-
-
     );
   </action>
   <action name="hidepanospotsaction">
     pauseTourSoundsActions(true,false,false,false,true);
     hidepanopointspots();
-
-
-
-
-  </action>
-
-  <action name="setzorder2onstandardspots">
-    if (device.html5,
-      ifnot (device.desktop,
-
-
-        set(hotspot[spotpoint454].zorder2, %1);
-
-      );
-    );
   </action>
 
 
 </scene>
-
 
   <krpano nofullspherepanoavailable="false" />
 

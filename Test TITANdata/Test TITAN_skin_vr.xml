@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<krpano version="1.19">
+<krpano version="1.19-pr16">
 
     
+
+
   <style name="IconDefaultPointSpotStyle"
          url="%FIRSTXML%/spots/hotspot_animated_user_defaultpoint0.png"
          visible="false"
@@ -11,6 +13,7 @@
          frameheight="64"
          stopspotsequence="false"
          crop="0|0|64|64"
+         edge="center"
          rotate="270"
          onloaded="startspotanimation(0.1);"
          onhover="onhoverIconDefaultPointSpotStyle"
@@ -19,18 +22,15 @@
 
 
          />
-
   <action name="onhoverIconDefaultPointSpotStyle">
     showtooltip('hotspot');
   </action>
-
   <action name="onoverIconDefaultPointSpotStyle">
 
 
 pauseautorotation(forcehotspot);
 
   </action>
-
   <action name="onoutIconDefaultPointSpotStyle">
     hideTooltip();
 
@@ -44,6 +44,97 @@ resumeautorotation(forcehotspot);
   
 
 
+
+
+  <hotspot ath="0" atv="90"
+         zorder="0"
+         name="logo"
+         keep="true"
+         visible="false"
+         capture="false"
+         url="%FIRSTXML%/graphics/logo/logo.png" 
+         handcursor="false"
+
+
+         />
+
+  <events name="logoevents" 
+    onTourStart="showlogo();"
+    keep="true" />
+
+  <action name="hidelogo">
+    set(hotspot[logo].visible, false);
+  </action>
+  <action name="showlogo">
+      set(hotspot[logo].visible, true);
+  </action>
+
+    <events name="logorotationevents" onviewchanged="updatelogorotation" keep="true"/>
+    <action name="updatelogorotation">
+        copy(hotspot[logo].rz, view.hlookat);
+    </action>
+
+
+  <events name="logoshowevents" onremovepano="hidelogo" onPanoStart="showlogo" keep="true"/>
+
+
+
+
+<action name="setViewArchitectural">
+	if(normalViewActivated,stopSetViewTweens(););
+	if(current_view_isflat === true,
+		setViewNonFlat(VFOV);
+	);
+	setViewArchitecturalComplete();
+</action>
+
+<action name="setViewArchitecturalComplete">
+	set(view.fovmax, get(panoview.fovmax));
+	set(view.fisheyefovlink, 0.5);
+	tween(view.architectural, 1.0, distance(1.0, 0.45));
+	tween(view.pannini, 0.0, distance(1.0, 0.45), easeOutQuad, if(panniniViewActivated,restoreViewFromPannini();););
+	tween(view.fisheye, 0.0, distance(1.0, 0.45), easeOutQuad, 
+		set(view.stereographic,false);
+		tween(view.vlookat, get(panoview.v), distance(90, 0.45));
+	);
+	tween(view.fov, get(panoview.fov), distance(50, 0.45));
+</action>
+
+<action name="setViewLittlePlanet">
+	set(sceneisfull360, false);
+	if(scene[get(xml.scene)].full360,
+		sub(viewhfov, panoview.hmax, panoview.hmin);
+		if (viewhfov == 360,
+			sub(viewvfov, panoview.vmax, panoview.vmin);
+			if (viewvfov == 180,
+				set(sceneisfull360, true);
+			);
+		);
+	);
+	if (sceneisfull360 AND (device.webgl OR device.flash),
+		if(normalViewActivated,stopSetViewTweens(););
+		if(current_view_isflat === true,
+			setViewNonFlat(VFOV);
+		);
+		setViewLittlePlanetComplete();
+	);
+</action>
+
+<action name="setViewLittlePlanetComplete">
+	set(backtonormalfirst,false);
+	if(view.pannini GE 1.0, set(backtonormalfirst,true));
+	if(view.stereographic == false, set(backtonormalfirst,true));
+	if(backtonormalfirst, hideTooltip();tween(view.fisheye, 0.0 ,distance(1.0, 0.25), easeOutQuad, WAIT); );
+	set(view.stereographic, true);
+	set(view.fisheyefovlink, 1.5);
+	tween(view.architectural, 0.0, 0.25);
+	tween(view.vlookat, 90, distance(179, 1.50));
+	tween(view.pannini, 0.0, distance(1.0, 0.75), easeOutQuad, if(panniniViewActivated,restoreViewFromPannini();););
+	if(panoview.fovmax LE 150, set(view.fovmax, 150); , set(view.fovmax, get(panoview.fovmax)); );
+	tween(view.fisheye, 1.0, distance(1.0, 0.75));
+	tween(view.fov, 150, distance(179, 0.75));
+</action>
+
   <action name="exitFullScreen" devices="fullscreensupport">set(tour_fullscreen,false);set(fullscreen,false);</action>
   <action name="enterFullScreen" devices="fullscreensupport">set(tour_fullscreen,true);set(fullscreen,true);</action>
   <action name="switchFullScreen">if(tour_fullscreen,exitFullScreen();,enterFullScreen(););</action>
@@ -54,6 +145,72 @@ resumeautorotation(forcehotspot);
     keep="true" />
 
   <action name="exitFullScreenChangeEvent" devices="fullscreensupport">set(tour_fullscreen,false);events.dispatch(onexitfullscreen);</action>
+
+  <action name="hideTourControls">set(tour_displaycontrols, false);events.dispatch(hidetourcontrols);</action>
+  <action name="showTourControls">set(tour_displaycontrols, true); events.dispatch(showtourcontrols);</action>
+
+
+<action name="setViewNormal">
+	stopSetViewTweens();
+	if(current_view_isflat === true,
+		setViewNonFlat(VFOV);
+	);
+	setViewNormalComplete();
+</action>
+
+<action name="setViewNormalComplete">
+	set(view.fisheyefovlink, 0.5);
+	set(view.fovmax, get(panoview.fovmax));
+	tween(view.architectural, 0.0, distance(1.0, 0.45));
+	tween(view.pannini, 0.0, distance(1.0, 0.45), easeOutQuad, if(panniniViewActivated,restoreViewFromPannini();););
+	tween(view.vlookat, get(panoview.v), distance(90, 0.45));
+	tween(view.fov, get(panoview.fov), distance(50, 0.45));
+	tween(view.fisheye, 0.0, distance(1.0, 0.45),
+		set(view.stereographic,false);
+	);
+</action>
+
+<krpano normalViewActivated="true" />
+<action name="stopSetViewTweens">
+	stoptween(view.fov);
+	stoptween(view.vlookat);
+	stoptween(view.fisheye);
+	stoptween(view.architectural);
+	stoptween(view.pannini);
+</action>
+
+<action name="setViewFisheye">
+	set(sceneisfull360, false);
+	if(scene[get(xml.scene)].full360,
+		sub(viewhfov, panoview.hmax, panoview.hmin);
+		if (viewhfov == 360,
+			sub(viewvfov, panoview.vmax, panoview.vmin);
+			if (viewvfov == 180,
+				set(sceneisfull360, true);
+			);
+		);
+	);
+	if (sceneisfull360 AND (device.webgl OR device.flash),
+		if(normalViewActivated,stopSetViewTweens(););
+		if(current_view_isflat === true,
+			setViewNonFlat(VFOV);
+		);
+		setViewFisheyeComplete();
+	);
+</action>
+
+<action name="setViewFisheyeComplete">
+	set(view.fisheyefovlink, 1.5);
+	set(view.fovmax, get(panoview.fovmax));
+	tween(view.architectural, 0.0, distance(1.0, 0.30));
+	tween(view.fisheye, 0.0, distance(1.0, 0.30), easeOutQuad,
+		set(view.stereographic,false);
+		tween(view.fisheye, 0.45, distance(1.0, 0.75));
+		tween(view.vlookat, get(panoview.v), distance(90, 0.45));
+	);
+	tween(view.pannini, 0.0, distance(1.0, 0.75), easeOutQuad, if(panniniViewActivated,restoreViewFromPannini();););
+	tween(view.fov, get(panoview.fov), distance(50, 0.45));
+</action>
 
 <action name="viewControlMoveUp">
 	if(%1,
@@ -197,14 +354,15 @@ resumeautorotation(forcehotspot);
 
   <plugin name="soundinterface"
           preload="true"
-          url="%SWFPATH%/graphics/soundinterface.swf"
-          alturl="%FIRSTXML%/graphics/soundinterface.js"
+          url.flash="%SWFPATH%/graphics/soundinterface.swf"
+          url.html5="%FIRSTXML%/graphics/soundinterface.js"
           rootpath="%$videos_sounds_path%/sounds"
           backgroundsound=""
           backgroundsoundloops="0"
           bgsound="false"
           bgsoundpaused="false"
           bgsoundloopended="false"
+          bgsoundtoforce = "false"
           volumeinitialized="false"
           started="true"
           keep="true"/>
@@ -310,12 +468,16 @@ resumeautorotation(forcehotspot);
             set(plugin[soundinterface].bgsound, true);
             set(plugin[soundinterface].bgsoundpaused, false);
             set(plugin[soundinterface].bgsoundloopended, false);
-            if(plugin[soundinterface].backgroundsoundloops GT 0,
-              playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops), stopbackgroundsoundoncomplete());
-            ,
-              playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops));
+            set(plugin[soundinterface].bgsoundtoforce, false);
+            if(scene[get(xml.scene)].video == false OR (scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == true),
+              if(plugin[soundinterface].backgroundsoundloops GT 0,
+                playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops), stopbackgroundsoundoncomplete());
+              ,
+                playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops));
+              );
             );
            ,
+            set(plugin[soundinterface].bgsoundtoforce, true);
             set(plugin[soundinterface].bgsound, false);
           );
         ,
@@ -325,6 +487,7 @@ resumeautorotation(forcehotspot);
               set(plugin[soundinterface].bgsoundpaused, false);
             );
           ,
+            set(plugin[soundinterface].bgsoundtoforce, true);
             set(plugin[soundinterface].bgsound, false);
           );
         );
@@ -400,15 +563,24 @@ resumeautorotation(forcehotspot);
             if((plugin[soundinterface].bgsoundpaused == true AND scene[get(xml.scene)].video == false) OR (scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == true),
               resumesound(bgsoundname);
               set(plugin[soundinterface].bgsoundpaused, false);
+            ,
+
+              if(device.mobile OR device.tablet OR device.safari OR device.chrome,
+                resumesound(bgsoundname);
+                set(plugin[soundinterface].bgsoundpaused, false);
+              );
             );
           ,
-            set(plugin[soundinterface].bgsound, true);
-            set(plugin[soundinterface].bgsoundpaused, false);
-            set(plugin[soundinterface].bgsoundloopended, false);
-            if(plugin[soundinterface].backgroundsoundloops GT 0,
-              playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops), stopbackgroundsoundoncomplete());
-            ,
-              playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops));
+            if(((plugin[soundinterface].bgsoundpaused == true OR plugin[soundinterface].bgsoundtoforce == true) AND scene[get(xml.scene)].video == false) OR (scene[get(xml.scene)].video == true AND scene[get(xml.scene)].scenevideomute == true),
+              set(plugin[soundinterface].bgsound, true);
+              set(plugin[soundinterface].bgsoundpaused, false);
+              set(plugin[soundinterface].bgsoundloopended, false);
+              set(plugin[soundinterface].bgsoundtoforce, false);
+              if(plugin[soundinterface].backgroundsoundloops GT 0,
+                playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops), stopbackgroundsoundoncomplete());
+              ,
+                playsound(bgsoundname, get(plugin[soundinterface].backgroundsound), get(plugin[soundinterface].backgroundsoundloops));
+              );
             );
           );
         );
@@ -596,6 +768,12 @@ resumeautorotation(forcehotspot);
           if(tour_current_played_sound_paused,
             set(tour_current_played_sound_paused, false);
             resumesound(get(tour_current_played_sound));
+          ,
+
+            if(device.mobile OR device.tablet OR device.safari OR device.chrome,
+              set(tour_current_played_sound_paused, false);
+              resumesound(get(tour_current_played_sound));
+            );
           );
         );
       );
@@ -611,12 +789,18 @@ resumeautorotation(forcehotspot);
       );
       if(resumeVideoActionsVerification,
         if (tour_soundson,
-          div(volume, tour_soundsvolume, 100);
           if(device.flash OR (device.webgl AND !device.ios),
+            div(volume, tour_soundsvolume, 100);
             set(layer[displayedStandardVideo].volume, get(volume));
           ,
             ifnot(device.ios,
               js(kpanotour.Sounds.startVideosSounds(get(volume)));
+            ,
+              if(tour_soundsvolume GT 0,
+                set(layer[displayedStandardVideo].muted, false);
+              ,
+                set(layer[displayedStandardVideo].muted, true);
+              );
             );
           );
         ,
@@ -625,6 +809,8 @@ resumeautorotation(forcehotspot);
           ,
             ifnot(device.ios,
               js(kpanotour.Sounds.stopVideosSounds());
+            ,
+              set(layer[displayedStandardVideo].muted, true);
             );
           );
         );
@@ -646,6 +832,8 @@ resumeautorotation(forcehotspot);
       ,
         ifnot(device.ios,
           js(kpanotour.Sounds.stopVideosSounds());
+        ,
+          set(layer[displayedStandardVideo].muted, true);
         );
       );
     );

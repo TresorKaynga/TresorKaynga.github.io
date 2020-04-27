@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <krpano>
-  <krpano 
-        tour_soundson="false" 
-        tour_soundsvolume="75" 
+  <krpano
+        tour_soundson="true"
+        tour_soundsvolume="100"
         tour_autotourenabled="false"
         tour_autorotateenabled="false"
         tour_controlmodemousetype="drag"
@@ -20,6 +20,9 @@
   <krpano videos_sounds_path="%FIRSTXML%" devices="html5" />
   <krpano videos_sounds_path="%SWFPATH%" devices="flash" />
   <krpano projection_current_params="view.fisheyefovlink=0.5&amp;view.architectural=0.0&amp;view.pannini=0.0&amp;view.fisheye=0.0&amp;view.stereographic=false" />
+
+
+  <display autofullscreen="false" devices="android" />
 
 
   <krpano vrtourdevice.desktop="desktop" vrtourdevice.tablet="tablet" vrtourdevice.mobile="mobile" />
@@ -81,6 +84,45 @@
 
 
 
+  <events name="ptp_audio_events" devices="mobile.or.tablet.or.safari.or.chrome" keep="true"
+    onTourStart="ptp_audio_start_event();"
+    />
+  <action name="ptp_audio_start_event" devices="mobile.or.tablet.or.safari.or.chrome">
+    set(events[ptp_audio_events].onTourStart, null);
+    ptp_audio_start();
+  </action>
+  <action name="ptp_audio_start" devices="mobile.or.tablet.or.safari.or.chrome">
+    if (tour_soundson === true,
+      playTourSounds();
+    );
+  </action>
+
+  <events name="userGestureAutoplayEvents" devices="mobile.or.tablet.or.safari.or.chrome"
+    onclick="activateAutoplayOnGesture();"
+    onmouseup="activateAutoplayOnGesture();"
+    onmousedown="activateAutoplayOnGesture();"
+    onkeydown="activateAutoplayOnGesture()"
+    onkeyup="activateAutoplayOnGesture();"
+    keep="true" />
+
+  <action name="activateAutoplayOnGesture" devices="mobile.or.tablet.or.safari.or.chrome">
+    startAutoplayOnGesture();
+
+    set(events[userGestureAutoplayEvents].onclick, null);
+    set(events[userGestureAutoplayEvents].onmouseup, null);
+    set(events[userGestureAutoplayEvents].onmousedown, null);
+    set(events[userGestureAutoplayEvents].onkeydown, null);
+    set(events[userGestureAutoplayEvents].onkeyup, null);
+    set(events[userGestureAutoplayEvents].keep, false);
+  </action>
+
+  <action name="startAutoplayOnGesture" devices="mobile.or.tablet.or.safari.or.chrome">
+    if(scene[get(xml.scene)].video == true,
+      scene[get(xml.scene)].onstart();
+    );
+    set(videointerface_firstvideoscene, false);
+  </action>
+
 
 
 
@@ -94,9 +136,12 @@
   </action>
   <action name="mainloadscene">
     if (xml.scene != %1,
+      events.dispatch(onleavingscene, true);
 
       interruptAnimation();
       resetbackgroundsoundifneeded(%1);
+
+      set(videoscenestarttime, 0);
 
       for(set(scenei,0), scenei LT scene.count, inc(scenei),if(scene[get(scenei)].name == %1,
 
@@ -124,7 +169,14 @@
       
 
 
-      loadscene(%1, get(projection_current_params), NOPREVIEW|MERGE|KEEPVIEW|KEEPMOVING, get(ptblendmode));
+      indexoftxt(indexsafariversion, get(device.safariversion), ".");
+      subtxt(majorsafariversion, get(device.safariversion), 0, get(indexsafariversion));
+      if ((device.ios AND device.iosversion GE 11) OR (device.safari AND majorsafariversion GE 11),
+        loadscene(%1, get(projection_current_params), NOPREVIEW|MERGE|KEEPVIEW|KEEPMOVING);
+      ,
+        loadscene(%1, get(projection_current_params), NOPREVIEW|MERGE|KEEPVIEW|KEEPMOVING, get(ptblendmode));
+      );      
+
 
 
       ););
@@ -138,33 +190,17 @@
   </action>
 
   <action name="loadPreviousScene">
-    if (%1 != findscene, sub(sceneprevnexti, scene.count, 1));
-    copy(scenenamei, scene[get(sceneprevnexti)].name);
+    copy(sceneprevnexti, scene[get(xml.scene)].index);
     dec(sceneprevnexti);
-    if (scenenamei == xml.scene,
-      if (sceneprevnexti GE 0,
-        mainloadscene(get(scene[get(sceneprevnexti)].name));
-       ,
-        sub(lasti, scene.count, 1);
-        mainloadscene(get(scene[get(lasti)].name));
-      );
-     ,
-      if(sceneprevnexti GE 0, loadPreviousScene(findscene));
-    );
+    if (sceneprevnexti LT 0, sub(sceneprevnexti, scene.count, 1););
+    mainloadscene(get(scene[get(sceneprevnexti)].name));
   </action>
 
   <action name="loadNextScene">
-    if (%1 != findscene, set(sceneprevnexti,0));
-    copy(scenenamei, scene[get(sceneprevnexti)].name);
+    copy(sceneprevnexti, scene[get(xml.scene)].index);
     inc(sceneprevnexti);
-    if (scenenamei == xml.scene,
-      if (sceneprevnexti LT scene.count,
-        mainloadscene(get(scene[get(sceneprevnexti)].name));
-       ,
-        mainloadscene(get(scene[0].name)); );
-     ,
-      if(sceneprevnexti LT scene.count, loadNextScene(findscene));
-    );
+    if (sceneprevnexti GE scene.count, set(sceneprevnexti, 0););
+    mainloadscene(get(scene[get(sceneprevnexti)].name));
   </action>
 
 
@@ -260,15 +296,10 @@
     );
   </action>
   <events name="autorotation_events" onnewpano="if(tour_autorotation_pauseplugin LE 0,resumeautorotation(forceresume););" ongyroscopeon="pauseautorotation(forceplugin);" ongyroscopeoff="resumeautorotation(forceplugin);" keep="true"/>
-  <events name="autorotationstartevents" onTourStart="autorotationatstart();" keep="true"/>
-  <action name="autorotationatstart">
-    if (norotation === null, startautorotation(););
-    set(events[autorotationstartevents].keep, false);
-  </action>
 
 
 
-  <krpano useautotourdelay="true" autotourdelay="20" autotourHorizontalStartValue="0" />
+  <krpano useautotourdelay="false" autotourdelay="5" autotourHorizontalStartValue="0" />
   <action name="startautotour">
     set(tour_autotourenabled, true);
 startautorotation();
@@ -280,7 +311,28 @@ startautorotation();
   </action>
   <action name="resetautotourvariables">
     stopautotourtimer();
-    delayedcall(autotour_call_id, get(autotourdelay), autotourtimer);
+    if (scene[get(xml.scene)].planar,
+      set(autotourdelay, 10);
+      delayedcall(autotour_call_id, get(autotourdelay), autotourtimer);
+    ,
+      set(autotourHorizontalStartValue, get(view.hlookat));
+      if ((panoview.hmin == -180) AND (panoview.hmax == 180),
+        delayedcallAutotourFull360();
+      ,
+        set(previousStep, 0);
+        set(panoramaHorizontalSize, 0);
+        set(totalPartialSize, 0);
+        set(firstBorderSize, 0);
+        set(secondBorderSize, 0);
+        set(firstStep, 0);
+        set(firstStepTest, 0);
+        set(firstStepKeep, 0);
+        set(borderCounter, 0);
+        sub(panoramaHorizontalSize, get(panoview.hmax), get(panoview.hmin));
+        Math.abs(panoramaHorizontalSize);
+        delayedcallAutotourPartial();
+      );
+    );
   </action>
   <action name="delayedcallAutotourPartial">
     sub(tempPosition, get(view.hlookat), get(autotourHorizontalStartValue));
@@ -344,7 +396,7 @@ stopautorotation();
   <action name="autotourtimer">
     if(tour_autotourenabled,
       if(tour_autorotateenabled,
-        if(autorotate.enabled OR useautotourdelay == true,
+        if(autorotate.enabled,
           stopautotour();loadNextScene();
 
           startautotour();
@@ -366,6 +418,11 @@ stopautorotation();
   </action>
   <action name="autotouronuseraction">
     if(tour_autotourenabled, if(%1, resetautotourvariables();, stopautotourtimer();););
+  </action>
+  <events name="autotourstartevents" onTourStart="autotouratstart();" keep="true" />
+  <action name="autotouratstart">
+    if(norotation === null, if(noautotour === null, startautotour();););
+    set(events[autotourstartevents].keep, false);
   </action>
 
 
@@ -424,47 +481,12 @@ stopautorotation();
   
   <contextmenu fullscreen="false" versioninfo="false" />
 
+
 <krpano tooltipCurrentTextfieldLayer="panotourTooltipDefaultText" coretooltipmess=""/>
 
-<events name="showHideTooltipEvents" onremovepano="hideTooltip();" keep="true" />
 
-<action name="showTooltip">
-  if (tooltip !== null,
-	getmessage(currentTooltipText, get(tooltip));
-	if (%2 == null,
-		set(tooltipCurrentTextfieldLayer, "panotourTooltipDefaultText");
-	,
-		set(tooltipCurrentTextfieldLayer, %2);
-	);
-  );
-</action>
+
 <action name="hideTooltip">
-	set(layer[get(tooltipCurrentTextfieldLayer)].visible, false);
-	set(layer[get(tooltipCurrentTextfieldLayer)].html, '');
-</action>
-
-<action name="tooltipTextSettingsUpdate">
-	if(get(tooltipCurrentTextfieldLayer) != "",
-
-		set(layer[get(tooltipCurrentTextfieldLayer)].align, "center");
-		if (%2 == null,
-			set(layer[get(tooltipCurrentTextfieldLayer)].edge, "bottom");
-		,
-			set(layer[get(tooltipCurrentTextfieldLayer)].edge, %2);
-		);
-		if (%3 != null,
-			set(layer[get(tooltipCurrentTextfieldLayer)].autowidth, false);
-			set(layer[get(tooltipCurrentTextfieldLayer)].wordwrap, true);
-			set(layer[get(tooltipCurrentTextfieldLayer)].width, %3);
-		);
-		if (%4 != null,
-			set(layer[get(tooltipCurrentTextfieldLayer)].xoffset, %4);
-		);
-		if (%5 != null,
-			set(layer[get(tooltipCurrentTextfieldLayer)].yoffset, %5);
-		);
-		set(layer[get(tooltipCurrentTextfieldLayer)].zorder, 99);
-	);
 </action>
 
 <action name="showPermanentTooltip">
@@ -487,66 +509,36 @@ stopautorotation();
 				);
 			);
 			if(activateUsePermanentTooltip,
-				addlayer(get(permanentTooltipForSpot));
-				txtadd(plugin[get(permanentTooltipForSpot)].parent, 'hotspot[', get(name), ']');
-				if (%2 == null,
-					if(rotate,
-						sub(newRotate, 0, get(rotate));
-						if(rotate GE 0 AND rotate LT 45 OR rotate GE 315 AND rotate LT 360,
-							set(plugin[get(permanentTooltipForSpot)].rotate,get(newRotate));
-							set(plugin[get(permanentTooltipForSpot)].align,bottom);
-						,
-							if(rotate GE 45 AND rotate LT 135,
-								set(plugin[get(permanentTooltipForSpot)].rotate,get(newRotate));
-								set(plugin[get(permanentTooltipForSpot)].align,right);
-							,
-								if(rotate GE 135 AND rotate LT 225,
-									set(plugin[get(permanentTooltipForSpot)].rotate,get(newRotate));
-									set(plugin[get(permanentTooltipForSpot)].align,top);
-								,
-									set(plugin[get(permanentTooltipForSpot)].rotate,get(newRotate));
-									set(plugin[get(permanentTooltipForSpot)].align,left);
-								);
-							);
-						);
-					,
-						set(plugin[get(permanentTooltipForSpot)].align,bottom);
-					);
-					set(plugin[get(permanentTooltipForSpot)].edge,top);
-				,
+				addhotspot(get(permanentTooltipForSpot));
+				set(hotspot[get(permanentTooltipForSpot)].ath, get(hotspot[get(name)].ath));
+     			set(hotspot[get(permanentTooltipForSpot)].atv, get(hotspot[get(name)].atv));
+     			set(hotspot[get(permanentTooltipForSpot)].oy, calc(hotspot[get(name)].height / 2));
 
-					set(plugin[get(permanentTooltipForSpot)].align,%2);
-					set(plugin[get(permanentTooltipForSpot)].edge,%3);
-				);
-				set(plugin[get(permanentTooltipForSpot)].enabled,false);
-				set(plugin[get(permanentTooltipForSpot)].capture,false);
-				set(layer[get(permanentTooltipForSpot)].visible, true);
-			
-				set(plugin[get(permanentTooltipForSpot)].url,'%FIRSTXML%/graphics/textfield.swf');
-				set(plugin[get(permanentTooltipForSpot)].background,true);
-				set(plugin[get(permanentTooltipForSpot)].backgroundcolor,0x2c87a3);
-				set(plugin[get(permanentTooltipForSpot)].backgroundalpha,1);
-				set(plugin[get(permanentTooltipForSpot)].border,false);
-				set(plugin[get(permanentTooltipForSpot)].shadow,1);
-				set(plugin[get(permanentTooltipForSpot)].shadowrange,4.0);
-				set(plugin[get(permanentTooltipForSpot)].shadowangle,45);
-				set(plugin[get(permanentTooltipForSpot)].shadowcolor,0x000000);
-				set(plugin[get(permanentTooltipForSpot)].shadowalpha,1);
-				set(plugin[get(permanentTooltipForSpot)].textshadow,1);
-				set(plugin[get(permanentTooltipForSpot)].textshadowrange,4.0);
-				set(plugin[get(permanentTooltipForSpot)].textshadowangle,45);
-				set(plugin[get(permanentTooltipForSpot)].textshadowcolor,0x000000);
-				set(plugin[get(permanentTooltipForSpot)].textshadowalpha,1);
-				set(plugin[get(permanentTooltipForSpot)].css,'color:#ffffff;font-family:Arial;font-weight:bold;font-size:14px;text-align:center;');
-				set(plugin[get(permanentTooltipForSpot)].height,20);
-				set(plugin[get(permanentTooltipForSpot)].autoheight,true);
-				set(plugin[get(permanentTooltipForSpot)].selectable,false);
-				set(plugin[get(permanentTooltipForSpot)].zorder,0);
-				set(plugin[get(permanentTooltipForSpot)].padding,2);
+     			set(hotspot[get(permanentTooltipForSpot)].edge,top);
+				set(hotspot[get(permanentTooltipForSpot)].type,text);
+				set(hotspot[get(permanentTooltipForSpot)].bg,true);
+				set(hotspot[get(permanentTooltipForSpot)].bgcolor,0x2c87a3);
+				set(hotspot[get(permanentTooltipForSpot)].bgalpha,1);
+				set(hotspot[get(permanentTooltipForSpot)].bgroundedge,5);
+				set(hotspot[get(permanentTooltipForSpot)].bgborder,0);
+				set(hotspot[get(permanentTooltipForSpot)].bgshadow,'1.0 1.0 4.0 0x000000 1');
+				set(hotspot[get(permanentTooltipForSpot)].txtshadow,'1.0 1.0 4.0 0x000000 1');
+				set(hotspot[get(permanentTooltipForSpot)].css,'color:#ffffff;font-family:Helvetica;font-size:14px;text-align:center;');
+				set(hotspot[get(permanentTooltipForSpot)].interactivecontent, false);
+				set(hotspot[get(permanentTooltipForSpot)].zorder,3);
+				set(hotspot[get(permanentTooltipForSpot)].padding,2);
+
+				set(hotspot[get(permanentTooltipForSpot)].distorted,true);
+				set(hotspot[get(permanentTooltipForSpot)].depth,1000);
+				set(hotspot[get(permanentTooltipForSpot)].tag,"tooltip");
+
+				set(hotspot[get(permanentTooltipForSpot)].enabled,false);
+				set(hotspot[get(permanentTooltipForSpot)].capture,false);
+				set(hotspot[get(permanentTooltipForSpot)].visible, true);
 
 				set(tooltipHtmlText, get(currentTooltipText));
 				escape(tooltipHtmlText);
-				set(layer[get(permanentTooltipForSpot)].html, get(tooltipHtmlText));
+				set(hotspot[get(permanentTooltipForSpot)].html, get(tooltipHtmlText));
 			);
 		);
 	);
@@ -559,7 +551,7 @@ stopautorotation();
 			if(permTooltipName,
 				getmessage(changeTooltipTxt, get(hotspot[get(hsi)].tooltip));
 				escape(changeTooltipTxt);
-				set(layer[get(permTooltipName)].html, get(changeTooltipTxt));
+				set(hotspot[get(permTooltipName)].html, get(changeTooltipTxt));
 			);
 		);
 	);
@@ -570,28 +562,31 @@ stopautorotation();
 
 
 
-<layer name="panotourTooltipDefaultText"
+
+<hotspot name="panotourTooltipDefaultText"
 	keep="true"
 	enabled="false"
 	capture="false"
-	url="%FIRSTXML%/graphics/textfield.swf"
+	type="text"
 	align="center"
-	background="true"
-	backgroundcolor="0x2c87a3"
-	backgroundalpha="1"
-	border="false"
-	shadow="1" shadowrange="4.0" shadowangle="45" shadowcolor="0x000000" shadowalpha="1"
-	textshadow="1" textshadowrange="4.0" textshadowangle="45" textshadowcolor="0x000000" textshadowalpha="1"
-	css="color:#ffffff;font-family:Arial;font-weight:bold;font-size:14px;text-align:left;"
-	height="20" 
-	autoheight="true"
-	autowidth="auto"
-	edge="bottom"
-	selectable="false"
-	zorder="0"
+	bg="true"
+	bgcolor="0x2c87a3"
+	bgalpha="1"
+	bgroundedge="5"
+	bgborder="0"
+	bgshadow="1.0 1.0 4.0 0x000000 1"
+	txtshadow="1.0 1.0 4.0 0x000000 1"
+	css="color:#ffffff;font-family:Helvetica;font-size:14px;text-align:left;"
+	edge="top"
+	zorder="4"
+	distorted="true"
+	depth="1000"
+	renderer="webgl"
+	oversampling="1.0"
+	mipmapping="false"
+	interactivecontent="false"
+	wordwrap="true"
 	padding="2"
-	xoffset="0"
-	yoffset="0"
 	visible="false"
 	html=""
 />
@@ -604,7 +599,7 @@ stopautorotation();
 
 <krpano videointerface_vrfirstscene="true" />
 
-<events name="videointerface_vrstart_events" keep="true" 
+<events name="videointerface_vrstart_events" keep="true"
 	onnewpano="videointerface_auto_pause_vr_init();"
 	onTourStart="videointerface_auto_play_vr_init();"
 	/>
@@ -630,13 +625,17 @@ stopautorotation();
 	if(scene[get(xml.scene)].video == true,
 		if(plugin[WebVR],if(plugin[WebVR].isenabled,
 			if(plugin[get(videointerface_video)],if(plugin[get(videointerface_video)].ispaused == true,
+				if(videoscenestarttime GT 0,
+	            	plugin[get(videointerface_video)].seek(videoscenestarttime);
+	            	set(videoscenestarttime, 0);
+	            );
 				plugin[get(videointerface_video)].play();
 			););
 		););
 	);
 </action>
 
-<events name="videointerface_start_events" devices="mobile.or.tablet" keep="true" 
+<events name="videointerface_start_events" devices="mobile.or.tablet" keep="true"
 	onmousedown="videointerface_auto_start();"
 	onvideointerfaceinit="videointerface_auto_start_init();"
 	/>
@@ -697,14 +696,14 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 	/>
 
 
-<events name="videointerface_events" 
-	onremovepano="videointerface_close();" 
-	videointerfaceready="videointerface_open();" 
-	videointerfaceactivated="videointerface_update_pausestate();" 
-	changetoursoundsevent="videointerface_change_sound();" 
-	stoptoursoundsevent="videointerface_stop_sound();" 
-	playtoursoundsevent="videointerface_start_sound();" 
-	onplayvideointerface="videointerface_close_splashscreen();" 
+<events name="videointerface_events"
+	onremovepano="if(scene[get(xml.scene)].video == true,videointerface_close(););"
+	videointerfaceready="videointerface_open();"
+	videointerfaceactivated="videointerface_update_pausestate();"
+	changetoursoundsevent="videointerface_change_sound();"
+	stoptoursoundsevent="videointerface_stop_sound();"
+	playtoursoundsevent="videointerface_start_sound();"
+	onplayvideointerface="videointerface_close_splashscreen();"
 	keep="true" />
 
 <action name="dispatch_video_start">
@@ -717,28 +716,48 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 <action name="videointerface_change_sound">
 	ifnot(plugin[get(videointerface_video)].mute,
-		div(volume, tour_soundsvolume, 100);
-		set(plugin[get(videointerface_video)].volume, get(volume));
+		ifnot(device.ios,
+			div(volume, tour_soundsvolume, 100);
+			set(plugin[get(videointerface_video)].volume, get(volume));
+		,
+			if(tour_soundsvolume GT 0,
+				set(plugin[get(videointerface_video)].muted, false);
+			,
+				set(plugin[get(videointerface_video)].muted, true);
+			);
+		);
 	);
 </action>
 <action name="videointerface_start_sound">
 	ifnot(plugin[get(videointerface_video)].mute,
-	if (tour_soundson,
-		ifnot(device.ios,
-			div(volume, tour_soundsvolume, 100);
-			set(plugin[get(videointerface_video)].volume, get(volume));
+		if (tour_soundson,
+			ifnot(device.ios,
+				div(volume, tour_soundsvolume, 100);
+				set(plugin[get(videointerface_video)].volume, get(volume));
+			,
+				if(tour_soundsvolume GT 0,
+					set(plugin[get(videointerface_video)].muted, false);
+				,
+					set(plugin[get(videointerface_video)].muted, true);
+				);
+			);
+		,
+			ifnot(device.ios,
+				set(plugin[get(videointerface_video)].volume, 0);
+			,
+				set(plugin[get(videointerface_video)].muted, true);
+			);
 		);
-	,
-		ifnot(device.ios,
-			set(plugin[get(videointerface_video)].volume, 0);
-		);
-	););
+	);
 </action>
 <action name="videointerface_stop_sound">
 	ifnot(plugin[get(videointerface_video)].mute,
-	ifnot(device.ios,
-		set(plugin[get(videointerface_video)].volume, 0);
-	););
+		ifnot(device.ios,
+			set(plugin[get(videointerface_video)].volume, 0);
+		,
+			set(plugin[get(videointerface_video)].muted, true);
+		);
+	);
 </action>
 
 
@@ -756,13 +775,21 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 
 	ifnot(plugin[get(videointerface_video)].mute,
-		div(plugin[get(videointerface_video)].volume, tour_soundsvolume, 100);
+		ifnot(device.ios,
+			div(plugin[get(videointerface_video)].volume, tour_soundsvolume, 100);
+		,
+			if(tour_soundsvolume GT 0,
+				set(plugin[get(videointerface_video)].muted, false);
+			,
+				set(plugin[get(videointerface_video)].muted, true);
+			);
+		);
 	);
 
 
 	set(plugin[get(videointerface_video)].onvideoplay, videointerface_update_pausestate() );
 	set(plugin[get(videointerface_video)].onvideopaused, videointerface_update_pausestate() );
-	
+
 	set(plugin[get(videointerface_video)].issetup, true);
 </action>
 
@@ -779,6 +806,10 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 
 <action name="videointerface_play">
+	if(videoscenestarttime GT 0,
+		plugin[get(videointerface_video)].seek(videoscenestarttime);
+	    set(videoscenestarttime, 0);
+	);
 	plugin[get(videointerface_video)].play();
 </action>
 <action name="videointerface_stop">
@@ -820,19 +851,21 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 
 <action name="videointerface_open_splashscreen">
-	if(plugin[get(videointerface_video)].splashscreen,
+
+	if(plugin[get(videointerface_video)].splashscreen OR %1 == true,
 		set(hotspot[videointerface_splashscreen_image].visible, true);
 		tween(hotspot[videointerface_splashscreen_image].alpha, 1.0, 0.25, default);
-		set(plugin[get(videointerface_video)].splashscreen, false);
 	);
+	set(plugin[get(videointerface_video)].splashscreen, true);
 </action>
 <action name="videointerface_close_splashscreen">
 	if(%1 === true,
-		set(hotspot[videointerface_splashscreen_image].alpha,0);
-		set(hotspot[videointerface_splashscreen_image].visible,false);
+		set(hotspot[videointerface_splashscreen_image].alpha, 0);
+		set(hotspot[videointerface_splashscreen_image].visible, false);
 	,
 		tween(hotspot[videointerface_splashscreen_image].alpha, 0.0, 0.25, default,set(hotspot[videointerface_splashscreen_image].visible,false););
 	);
+	set(plugin[get(videointerface_video)].splashscreen, false);
 </action>
 
 
@@ -894,17 +927,144 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 </action>
 
 
+<action name="videointerface_onSceneStart">
+	if(videointerface_video,
+		if(scene[get(xml.scene)].scenevideoloop,
+			set(plugin[get(videointerface_video)].onvideocomplete, seek(0);play(););
+		,
+			if(scene[get(xml.scene)].scenevideoendaction == false,
+				set(plugin[get(videointerface_video)].onvideocomplete, pause(););
+			);
+		);
+		set(plugin[get(videointerface_video)].mute, get(scene[get(xml.scene)].scenevideomute));
+		set(plugin[get(videointerface_video)].muted, get(scene[get(xml.scene)].scenevideomute));
+
+	  if(scene[get(xml.scene)].scenevideomute OR tour_soundson == false,
+			set(plugin[get(videointerface_video)].volume, 0.0);
+		,
+
+			if(plugin[soundinterface] AND scene[get(xml.scene)].backgroundsound,
+				pausebackgroundsound();
+			);
+			div(videovolume, tour_soundsvolume, 100);
+			copy(plugin[get(videointerface_video)].volume, videovolume);
+		);
+		if(scene[get(xml.scene)].scenevideopausedonstart OR ((device.android OR device.chrome OR device.safari OR device.iphone) AND videointerface_firstvideoscene),
+
+	    videointerface_open_splashscreen(true);
+		,
+	    videointerface_close_splashscreen(true);
+	  );
+		if((device.android OR device.chrome OR device.safari OR device.iphone) AND videointerface_firstvideoscene,
+			set(scene[get(xml.scene)].scenevideopausedonstart, true);
+		);
+		if(device.panovideosupport == false OR (device.html5 AND device.ie AND device.mobile),
+	    set(plugin[get(videointerface_video)].panovideo, false);
+			set(plugin[get(videointerface_video)].width, 100%);
+			set(plugin[get(videointerface_video)].height, prop);
+			set(plugin[get(videointerface_video)].visible,true);
+		,
+	    set(plugin[get(videointerface_video)].panovideo, true);
+			set(plugin[get(videointerface_video)].width, '');
+			set(plugin[get(videointerface_video)].height, '');
+			set(plugin[get(videointerface_video)].visible, false);
+		  if(scene[get(xml.scene)].planar,
+			  set(image.hfov, 1.0);
+			  set(image.vfov, 0.0);
+			  updateobject(true, true);
+			);
+		);
+		if(scene[get(xml.scene)].scenevideolowresurl != '' AND (device.html5 AND (device.mobile OR device.tablet OR device.safari)),
+			copy(current_videoscene_url, scene[get(xml.scene)].scenevideolowresurl);
+			copy(current_videoscene_posterurl, scene[get(xml.scene)].scenevideolowresposterurl);
+			set(current_videoscene_quality, 'low');
+		,
+			copy(current_videoscene_url, scene[get(xml.scene)].scenevideourl);
+			copy(current_videoscene_posterurl, scene[get(xml.scene)].scenevideoposterurl);
+			set(current_videoscene_quality, 'high');
+		);
+		set(videoscene_url_found, false);
+		txtsplit(get(current_videoscene_url), '|', arr_videoscene);
+		for(set(scenevideoi,0), scenevideoi LT arr_videoscene.count, inc(scenevideoi),
+			indexoftxt(indexval, get(arr_videoscene[get(scenevideoi)].value), 'Test TITANdata/');
+			if(indexval LT 0,
+				txtadd(current_videoscene_url_update,'Test TITANdata/',get(arr_videoscene[get(scenevideoi)].value));
+				indexoftxt(indexval2, get(current_videoscene_url_update), get(plugin[get(videointerface_video)].videourl));
+			,
+				indexoftxt(indexval2, get(arr_videoscene[get(scenevideoi)].value), get(plugin[get(videointerface_video)].videourl));
+			);
+			if(indexval2 GE 0,
+				set(videoscene_url_found, true);
+			);
+			delete(indexval,indexval2,current_videoscene_url_update);
+		);
+		ifnot(videoscene_url_found,
+			if(plugin[get(videointerface_video)].issetup,
+				stopdelayedcall(videointerface_video_call);
+				plugin[get(videointerface_video)].playvideo(get(current_videoscene_url), get(current_videoscene_posterurl), get(scene[get(xml.scene)].scenevideopausedonstart), get(videoscenestarttime));
+	      set(videoscenestarttime, 0);
+				set(scene[get(xml.scene)].scenevideopausedonstart, false);
+
+				events.dispatch(videointerfaceactivated);
+			,
+				delayedcall(videointerface_videostart_call, 0.2, videointerface_onSceneStart();add(plugin[get(videointerface_video)].delay, 0.2););
+			);
+		,
+			if(plugin[get(videointerface_video)].videourl,
+				if(plugin[get(videointerface_video)].isvideoready,
+					stopdelayedcall(videointerface_video_call);
+
+					events.dispatch(videointerfaceready);
+					if(scene[get(xml.scene)].scenevideopausedonstart OR ((device.android OR device.chrome OR device.safari OR device.iphone) AND videointerface_firstvideoscene),
+						if(videointerface_autostart !== true,
+	            if(videoscenestarttime GT 0,
+	              plugin[get(videointerface_video)].seek(videoscenestarttime);
+	              set(videoscenestarttime, 0);
+	            );
+							plugin[get(videointerface_video)].play();
+							delayedcall(0,plugin[get(videointerface_video)].pause(););
+						,
+							plugin[get(videointerface_video)].pause();
+						);
+						set(scene[get(xml.scene)].scenevideopausedonstart, false);
+					,
+	          if(videoscenestarttime GT 0,
+	            plugin[get(videointerface_video)].seek(videoscenestarttime);
+	            set(videoscenestarttime, 0);
+	          );
+						plugin[get(videointerface_video)].play();
+						ifnot(tour_firststartactiondone,
+							plugin[get(videointerface_video)].pause();
+						);
+					);
+				,
+					delayedcall(videointerface_videostart_call, 0.2, videointerface_onSceneStart();add(plugin[get(videointerface_video)].delay, 0.2););
+				);
+			);
+		);
+		set(videointerface_firstvideoscene, false);
+		set(videointerface_autostart, true);
+		events.dispatch(onvideointerfaceinit);
+		delete(current_videoscene_url,current_videoscene_posterurl,videoscene_url_found,arr_videoscene);
+	,
+		delayedcall(videointerface_videostart_call, 0.1, videointerface_onSceneStart(););
+	);
+</action>
 
 
 
 
 
-	<plugin name="WebVR" devices="html5" keep="true"
+
+	<plugin name="webvr" devices="html5" keep="true"
 		url="%FIRSTXML%/graphics/webvr.js"
-		onloaded="copy(webvr, plugin[WebVR]);"
+		onloaded="copy(webvr, plugin[webvr]);"
 		mousespeed="0.00125"
 		multireslock="true"
-    fullscreen_mirroring="true"
+    	fullscreen_mirroring="true"
+    	headtracking="true"
+		friction="0.0"
+		zoom="1.0"
 		mobilevr_support="true"
 		worldscale="1.0"
 		oversampling="1.0"
@@ -916,8 +1076,6 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		mobilevr_lens_ca="0.000"
 		mobilevr_lens_vign="100"
 		mobilevr_lens_overlap="1.0"
-		mobilevr_webvr_dist=""
-		mobilevr_webvr_firefox="false"
 		mobilevr_wakelock="true"
 		mobilevr_sensor_mode="3"
 		mobilevr_autocalibration="false"
@@ -952,13 +1110,11 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			set(tour_firststartactiondone, true);
 		);
 	</action>
-
 	<action name="vr_video_start">
 		if(scene[get(xml.scene)].video,
 			dispatch_video_start();
 		);
 	</action>
-
 
 	<hotspot name="vr_cursor" keep="true"
 		url="%FIRSTXML%/graphics/webvr_cursor.png"
@@ -984,8 +1140,10 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			if(%1 != null, set(vr_aclk_timeout, %1), set(vr_aclk_timeout, 2000));
 			copy(vr_aclk_t1, timertick);
 			set(vr_aclk_waiting, true);
+			copy(webvr.vr_aclk_hotspot, name);
 			set(hotspot[vr_cursor].crop,'0|0|80|80');
-			asyncloop(vr_aclk_waiting,
+
+			asyncloop(vr_aclk_waiting AND webvr.vr_aclk_hotspot == name,
 				sub(dt, timertick,vr_aclk_t1);
 				if(!hovering,
 					set(vr_aclk_waiting, false);
@@ -1017,6 +1175,7 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		onkeydown="if(webvr AND webvr.isenabled AND keycode==32, webvr.resetSensor(0) );"
 		onmousedown="if(webvr AND webvr.isenabled, webvr_showbuttons() );"
 		onresize.mobile="webvr_portrait_mode_check();"
+		onexitfullscreen="vr_setup_close(false);"
 		/>
 
 
@@ -1042,14 +1201,14 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			set(webvr.mobilevr_lens_ca, 0.0);
 			set(webvr.mobilevr_lens_vign, 100);
 		  ,
-			set(ask_user_for_screensize,true);
+			set(webvr.ask_user_for_screensize,true);
 		  );
 	</action>
 
 
 	<action name="webvr_onunavailable">
 
-		delayedcall(5.0, js(accessStdVr()););
+		delayedcall(5.0, js(accessStdVr(get(xml.scene),get(videoscenestarttime))););
 
 		set(events[webvr_events].name, null);
 		removelayer(webvr_button_text);
@@ -1064,29 +1223,30 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(display.hotspotrenderer,'');
 
 		addlayer(webvr_button_unavailable);
-		set(layer[webvr_button_unavailable].url, "%FIRSTXML%/graphics/textfield.swf");
+		set(layer[webvr_button_unavailable].type, 'text');
 		getmessage(vr_setup_ct_message, "vr_setup_unavailable");
 		set(layer[webvr_button_unavailable].html, get(vr_setup_ct_message));
-		set(layer[webvr_button_unavailable].background, false);
+		set(layer[webvr_button_unavailable].bg, false);
 		set(layer[webvr_button_unavailable].align, "center");
 		set(layer[webvr_button_unavailable].edge, "center");
-		set(layer[webvr_button_unavailable].textshadow, 1.0);
-		set(layer[webvr_button_unavailable].textshadowrange, 4.0);
-		set(layer[webvr_button_unavailable].textshadowangle, 45.0);
-		set(layer[webvr_button_unavailable].textshadowcolor, "0xd5d5d5");
-		set(layer[webvr_button_unavailable].textshadowalpha, 1.0);
-		set(layer[webvr_button_unavailable].onclick, js(accessStdVr()););
+		set(layer[webvr_button_unavailable].txtshadow, '1.0 1.0 4.0 0xd5d5d5 1.0');
+		set(layer[webvr_button_unavailable].onclick, js(accessStdVr(get(xml.scene),get(videoscenestarttime))););
 		set(layer[webvr_button_unavailable].onloaded, if(device.mobile,set(css, 'color:#ffffff;font-size:24px;font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-align:center;');,set(css, 'color:#ffffff;font-size:32px;font-family:Arial,Helvetica,sans-serif;font-weight:bold;text-align:center;')));"
 	</action>
 
 	<action name="webvr_onentervr">
+
+        if(device.mobile OR device.tablet OR device.safari OR device.chrome,
+			ptp_audio_start();
+		);
+
 		vr_tour_start();
 
 		set(layer[webvr_enterbutton].visible, false);
 
 
-		if(webvr.ismobilevr == true AND !webvr.isfake AND ask_user_for_screensize == true AND webvr.mobilevr_screensize == 'auto',
-			set(ask_user_for_screensize, false);
+		if(webvr.ismobilevr == true AND !webvr.isfake AND webvr.ask_user_for_screensize == true AND webvr.mobilevr_screensize == 'auto',
+			set(webvr.ask_user_for_screensize, false);
 			vr_setup_advanced();
 		);
 	</action>
@@ -1099,7 +1259,7 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(layer[vr_rotate_device_required].alpha,0);
 
 
-		js(accessStdVr());
+		js(accessStdVr(get(xml.scene),get(videoscenestarttime)));
 	</action>
 
 
@@ -1140,17 +1300,13 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		>
 
 		<layer name="webvr_button_text"
-			url="%FIRSTXML%/graphics/textfield.swf"
+			type="text"
 			html=""
-			background="false"
+			bg="false"
 			align="center"
 			edge="bottom"
 			y="-100"
-			textshadow="1.0"
-			textshadowrange="4.0"
-			textshadowangle="45.0"
-			textshadowcolor="0xd5d5d5"
-			textshadowalpha="1.0"
+			txtshadow="1.0 1.0 4.0 0xd5d5d5 1.0"
 			enabled="false"
 			onloaded="getmessage(html, 'project_title');if(device.mobile,set(css, 'color:#ffffff;font-size:24px;font-family:Arial,Helvetica,sans-serif;font-weight:bold;');,set(css, 'color:#ffffff;font-size:32px;font-family:Arial,Helvetica,sans-serif;font-weight:bold;'));"
 			/>
@@ -1199,6 +1355,9 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 	<action name="vr_setup">
 		vr_setup_close(false);
 
+		if(webvr.vrsetup === null, def(webvr.vrsetup, object); );
+		copy(vrs, webvr.vrsetup);
+
 		set(webvr.vr_cursor_enabled, false);
 
 		tween(layer[webvr_exitbutton].alpha,0);
@@ -1233,15 +1392,15 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		roundval(i_dist, 2);
 
 		copy(i_dist2, webvr.mobilevr_lens_dist2);
-		txtsplit(i_dist2, '|', i_dist2_k1, i_dist2_k2, i_dist2_k3, i_dist2_k4);
-		mul(i_dist2_k1,1);
-		mul(i_dist2_k2,10);
-		mul(i_dist2_k3,10);
-		mul(i_dist2_k4,10);
-		roundval(i_dist2_k1,3);
-		roundval(i_dist2_k2,3);
-		roundval(i_dist2_k3,3);
-		roundval(i_dist2_k4,3);
+		txtsplit(i_dist2, '|', vrs.i_dist2_k1, vrs.i_dist2_k2, vrs.i_dist2_k3, vrs.i_dist2_k4);
+		mul(vrs.i_dist2_k1,1);
+		mul(vrs.i_dist2_k2,10);
+		mul(vrs.i_dist2_k3,10);
+		mul(vrs.i_dist2_k4,10);
+		roundval(vrs.i_dist2_k1,3);
+		roundval(vrs.i_dist2_k2,3);
+		roundval(vrs.i_dist2_k3,3);
+		roundval(vrs.i_dist2_k4,3);
 
 		copy(i_vig, webvr.mobilevr_lens_vign);
 		roundval(i_vig, 0);
@@ -1256,7 +1415,9 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 		for(set(vrheadi,0), vrheadi LT vrheadsets.headset.count, inc(vrheadi),
 			copy(hs, vrheadsets.headset[get(vrheadi)]);
-			if(i_fov == hs.fov AND i_dist == hs.dist AND i_vig == hs.vig AND i_overlap == hs.overlap AND i_dist2 == hs.dist2 AND i_ca == hs.ca, copy(i_headset, hs.caption));
+			if(i_fov == hs.fov AND i_dist == hs.dist AND i_vig == hs.vig AND i_overlap == hs.overlap AND i_dist2 == hs.dist2 AND i_ca == hs.ca,
+				copy(i_headset, hs.caption);
+			);
 		);
 
 
@@ -1275,6 +1436,7 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 	<action name="vr_setup_simple">
 		vr_setup();
+		copy(vrs, webvr.vrsetup);
 
 		set(layer[vr_setup_m1].visible, false);
 		set(layer[vr_setup_m2].visible, false);
@@ -1288,12 +1450,12 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(layer[vr_setup_m4].height, 100%);
 		set(layer[vr_setup_m4].visible, true);
 
-		set(vr_setup_text_parent, 'vr_setup_m4');
+		set(vrs.vr_setup_text_parent, 'vr_setup_m4');
 		vr_setup_createtext(vr_setup_hmd0, '', center, center, 0, -140, #FFFFFF, false);
 		vr_setup_createimage(vr_setup_hmd4, get(i_headset), center, center, 0, -20, #FFFFFF, true, vr_setup_select('headset_simple'), , vr_setup_save());
 		vr_setup_createtext(vr_setup_hmd2, get(i_headset), center, center, 0, 100, #FFFFFF, false);
 
-		vr_setup_createtext(vr_setup_advanced, '', center, center, 0, 140, #FFFFFF, true, set(background,true), set(background,false), vr_setup_advanced());
+		vr_setup_createtext(vr_setup_advanced, '', center, center, 0, 140, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_advanced());
 
 		vr_setup_createbutton(vr_setup_btn1, '&#60;', left, left, 5%, 0, #FFFFFF, true, null);
 		vr_setup_createbutton(vr_setup_btn2, '&#62;', right, right, 5%, 0, #FFFFFF, true, null);
@@ -1303,6 +1465,7 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 	<action name="vr_setup_advanced">
 		vr_setup();
+		copy(vrs, webvr.vrsetup);
 		set(layer[vr_setup_m4].visible, false);
 
 
@@ -1333,7 +1496,7 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(layer[vr_setup_m2].visible, false);
 
 
-		set(vr_setup_text_parent, 'vr_setup_m1');
+		set(vrs.vr_setup_text_parent, 'vr_setup_m1');
 		vr_setup_createtext(vr_setup_title, '', center, center, 0, -160, #FFFFFF, false);
 
 		vr_setup_createtext(vr_setup_dvn1, '', center, right, 0, -115, #FFFFFF, true, vr_setup_select('screen'));
@@ -1347,23 +1510,23 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		vr_setup_createtext(vr_setup_hmd1, '', center, right, 0, +5, #FFFFFF, true, vr_setup_select('headset'));
 		vr_setup_createtext(vr_setup_hmd2, get(i_headset), center, left, 0, +5, #FFFFFF, true, vr_setup_select('headset'));
 
-		vr_setup_createtext(vr_setup_hmd3, '', center, center, 0, +35, #FFFFFF, true, set(background,true), set(background,false), vr_setup_customize_headset());
+		vr_setup_createtext(vr_setup_hmd3, '', center, center, 0, +35, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_customize_headset());
 
 		if(webvr.iswebvr == false,
-			vr_setup_createtext(vr_setup_cal, '', center, center, 0, +80, #FFFFFF, true, set(background,true), set(background,false), vr_setup_calibration());
+			vr_setup_createtext(vr_setup_cal, '', center, center, 0, +80, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_calibration());
 		);
 
-		vr_setup_createtext(vr_setup_sav   , '', center, right, -20, +125, #00AA00, true, set(background,true), set(background,false), vr_setup_save());
-		vr_setup_createtext(vr_setup_rst   , '', center, left , +20, +125, #FFFFFF, true, set(background,true), set(background,false), vr_setup_reset());
-		vr_setup_createtext(vr_setup_simple, '', center, right, -20, +155, #FFFFFF, true, set(background,true), set(background,false), vr_setup_simple());
-		vr_setup_createtext(vr_setup_cls   , '', center, left , +20, +155, #FFFFFF, true, set(background,true), set(background,false), vr_setup_close(true));
+		vr_setup_createtext(vr_setup_sav   , '', center, right, -20, +125, #00AA00, true, set(bg,true), set(bg,false), vr_setup_save());
+		vr_setup_createtext(vr_setup_rst   , '', center, left , +20, +125, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_reset());
+		vr_setup_createtext(vr_setup_simple, '', center, right, -20, +155, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_simple());
+		vr_setup_createtext(vr_setup_cls   , '', center, left , +20, +155, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_close(true));
 
 
 		vr_setup_createbutton(vr_setup_btn1, '&#60;', left, left, 5%, 0, #FFFFFF, true, null);
 		vr_setup_createbutton(vr_setup_btn2, '&#62;', right, right, 5%, 0, #FFFFFF, true, null);
 
 
-		set(vr_setup_text_parent, 'vr_setup_m3');
+		set(vrs.vr_setup_text_parent, 'vr_setup_m3');
 		vr_setup_createtext(vr_setup_m31, '', center, center, 0, -160, #FFFFFF, false);
 
 		vr_setup_createtext(vr_setup_fov1, '', center, right, 0, -75, #FFFFFF, true, vr_setup_select('fov'));
@@ -1371,10 +1534,10 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		vr_setup_createtext(vr_setup_dst1, '', center, right, 0, -40, #FFFFFF, true, vr_setup_select('dist'));
 		vr_setup_createtext(vr_setup_dst2, get(i_dist), center, left, 0, -40, #FFFFFF, true, vr_setup_select('dist'));
 		vr_setup_createtext(vr_setup_d2tx, '', center, right, 0, -5, #FFFFFF, true, vr_setup_select('dist2k1'));
-		vr_setup_createtext(vr_setup_d2k1, get(i_dist2_k1), center, left, 0, -5, #FFFFFF, true, vr_setup_select('dist2k1'));
-		vr_setup_createtext(vr_setup_d2k2, get(i_dist2_k2), center, left, +100, -5, #FFFFFF, true, vr_setup_select('dist2k2'));
-		vr_setup_createtext(vr_setup_d2k3, get(i_dist2_k3), center, left, +200, -5, #FFFFFF, true, vr_setup_select('dist2k3'));
-		vr_setup_createtext(vr_setup_d2k4, get(i_dist2_k4), center, left, +300, -5, #FFFFFF, true, vr_setup_select('dist2k4'));
+		vr_setup_createtext(vr_setup_d2k1, get(vrs.i_dist2_k1), center, left, 0, -5, #FFFFFF, true, vr_setup_select('dist2k1'));
+		vr_setup_createtext(vr_setup_d2k2, get(vrs.i_dist2_k2), center, left, +100, -5, #FFFFFF, true, vr_setup_select('dist2k2'));
+		vr_setup_createtext(vr_setup_d2k3, get(vrs.i_dist2_k3), center, left, +200, -5, #FFFFFF, true, vr_setup_select('dist2k3'));
+		vr_setup_createtext(vr_setup_d2k4, get(vrs.i_dist2_k4), center, left, +300, -5, #FFFFFF, true, vr_setup_select('dist2k4'));
 
 		vr_setup_createtext(vr_setup_cac1, '', center, right, 0, +30, #FFFFFF, true, vr_setup_select('ca'));
 		vr_setup_createtext(vr_setup_cac2, get(i_ca), center, left, 0, +30, #FFFFFF, true, vr_setup_select('ca'));
@@ -1383,15 +1546,15 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		vr_setup_createtext(vr_setup_olp1, '', center, right, 0, +100, #FFFFFF, true, vr_setup_select('overlap'));
 		vr_setup_createtext(vr_setup_olp2, get(i_overlap), center, left, 0, +100, #FFFFFF, true, vr_setup_select('overlap'));
 
-		vr_setup_createtext(vr_setup_m35, '', center, center, 0, +160, #FFFFFF, true, set(background,true), set(background,false), vr_setup_close_sub_menus() );
+		vr_setup_createtext(vr_setup_m35, '', center, center, 0, +160, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_close_sub_menus() );
 
 
-		set(vr_setup_text_parent, 'vr_setup_m2');
+		set(vrs.vr_setup_text_parent, 'vr_setup_m2');
 		vr_setup_createtext(vr_setup_cb1, '', center, center, 0, -160, #FFFFFF, false);
 		vr_setup_createtext(vr_setup_cb2, '', center, center, 0, -80, #FFFFFF, false, vr_setup_select('screen'));
-		vr_setup_createtext(vr_setup_cb3, '', center, center, 0, +40, #00AA00, true, set(background,true), set(background,false), vr_setup_do_calibration());
-		vr_setup_createtext(vr_setup_cb4, '', center, center, 0, +80, #FFFFFF, true, set(background,true), set(background,false), webvr.resetcalibration());
-		vr_setup_createtext(vr_setup_cb5, '', center, center, 0, +160, #FFFFFF, true, set(background,true), set(background,false), vr_setup_close_sub_menus());
+		vr_setup_createtext(vr_setup_cb3, '', center, center, 0, +40, #00AA00, true, set(bg,true), set(bg,false), vr_setup_do_calibration());
+		vr_setup_createtext(vr_setup_cb4, '', center, center, 0, +80, #FFFFFF, true, set(bg,true), set(bg,false), webvr.resetcalibration());
+		vr_setup_createtext(vr_setup_cb5, '', center, center, 0, +160, #FFFFFF, true, set(bg,true), set(bg,false), vr_setup_close_sub_menus());
 
 		vr_setup_createtext(vr_setup_cb6, '', center, center, 0, +120, #FFFFFF, false, null);
 		vr_setup_createtext(vr_setup_cb7, '', center, center, 0, +120, #00AA00, false, null);
@@ -1413,18 +1576,18 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 	<action name="vr_setup_createtext">
 		addlayer(%1);
-		set(layer[%1].parent, get(vr_setup_text_parent));
-		set(layer[%1].url, '%FIRSTXML%/graphics/textfield.swf');
+		set(layer[%1].parent, get(webvr.vrsetup.vr_setup_text_parent));
+		set(layer[%1].type, 'text');
 		if(device.mobile,
 			set(layer[%1].css, 'color:%7;font-size:24px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;');
 		,
 			set(layer[%1].css, 'color:%7;font-size:32px;font-weight:bold;font-family:Arial,Helvetica,sans-serif;');
 		);
 		set(layer[%1].padding, 0 8);
-		set(layer[%1].roundedge, 8);
-		set(layer[%1].background, false);
-		set(layer[%1].backgroundcolor, 0xFFFFFF);
-		set(layer[%1].backgroundalpha, 0.25);
+		set(layer[%1].bgroundedge, 8);
+		set(layer[%1].bg, false);
+		set(layer[%1].bgcolor, 0xFFFFFF);
+		set(layer[%1].bgalpha, 0.25);
 		set(layer[%1].align, %3);
 		set(layer[%1].edge, %4);
 		set(layer[%1].x, %5);
@@ -1454,15 +1617,15 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			set(layer[%1].width, 60);
 			set(layer[%1].height, 60);
 		);
-		set(layer[%1].background, true);
+		set(layer[%1].bg, true);
 		set(layer[%1].padding, 0);
-		set(layer[%1].roundedge, 8);
+		set(layer[%1].bgroundedge, 8);
 		set(layer[%1].vcenter, true);
 	</action>
 
 	<action name="vr_setup_createimage">
 		addlayer(%1);
-		set(layer[%1].parent, get(vr_setup_text_parent));
+		set(layer[%1].parent, get(webvr.vrsetup.vr_setup_text_parent));
 		set(hmd_headset, %2);
 		txtreplace(hmd_headset, ' ', '');
 		txtadd(imgurl, '%FIRSTXML%/graphics/', get(hmd_headset), '.png');
@@ -1497,13 +1660,19 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 
 		set(webvr.mobilevr_lens_fov, 100.0);
 		set(webvr.mobilevr_lens_dist, 0.50);
-		set(webvr.mobilevr_lens_dist2, 0.000|0.000|0.000|0.000);
+		set(webvr.mobilevr_lens_dist2, 1.000|0.000|0.000|0.000);
 		set(webvr.mobilevr_lens_vign, 100);
 		set(webvr.mobilevr_lens_overlap, 1.00);
 		set(webvr.mobilevr_lens_ca, 0.000);
-		vr_setup_change_headset(1);
 
-		vr_setup_select(get(selected_var));
+		if(webvr.isfake AND device.desktop,
+			vr_setup_change_headset(-1);
+		,
+			vr_setup_change_headset(1);
+		);
+
+		copy(vrs, webvr.vrsetup);
+		vr_setup_select(get(vrs.var));
 	</action>
 
 	<action name="vr_setup_close">
@@ -1534,7 +1703,8 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(layer[vr_setup_hmd1].y, -110);
 		set(layer[vr_setup_hmd2].y, -110);
 
-		copy(old_selection, selected_var);
+		copy(vrs, webvr.vrsetup);
+		copy(vrs.old_selection, vrs.var);
 		vr_setup_select('headset');
 	</action>
 
@@ -1556,14 +1726,16 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 		set(layer[vr_setup_hmd1].y, +5);
 		set(layer[vr_setup_hmd2].y, +5);
 
-		if(old_selection,
-			vr_setup_select(get(old_selection));
-			delete(old_selection);
+		copy(vrs, webvr.vrsetup);
+		if(vrs.old_selection,
+			vr_setup_select(get(vrs.old_selection));
+			delete(vrs.old_selection);
 		);
 	</action>
 
 	<action name="vr_setup_update_dist2">
-		txtadd(webvr.mobilevr_lens_dist2, get(i_dist2_k1), '|', calc(i_dist2_k2/10.0), '|', calc(i_dist2_k3/10.0), '|', calc(i_dist2_k4/10.0));
+		copy(vrs, webvr.vrsetup);
+		txtadd(webvr.mobilevr_lens_dist2, get(vrs.i_dist2_k1), '|', calc(vrs.i_dist2_k2/10.0), '|', calc(vrs.i_dist2_k3/10.0), '|', calc(vrs.i_dist2_k4/10.0));
 		vr_setup_change_headset(0);
 	</action>
 
@@ -1585,181 +1757,181 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 	</action>
 
 	<action name="vr_setup_select">
+		copy(vrs, webvr.vrsetup);
 
-		set(layer[vr_setup_siz2].background, false);
-		set(layer[vr_setup_ipd2].background, false);
-		set(layer[vr_setup_hmd2].background, false);
-		set(layer[vr_setup_fov2].background, false);
-		set(layer[vr_setup_dst2].background, false);
-		set(layer[vr_setup_d2k1].background, false);
-		set(layer[vr_setup_d2k2].background, false);
-		set(layer[vr_setup_d2k3].background, false);
-		set(layer[vr_setup_d2k4].background, false);
-		set(layer[vr_setup_vig2].background, false);
-		set(layer[vr_setup_cac2].background, false);
-		set(layer[vr_setup_olp2].background, false);
-
-		set(selected_setting, null);
-		delete(selected_var_value);
+		set(layer[vr_setup_siz2].bg, false);
+		set(layer[vr_setup_ipd2].bg, false);
+		set(layer[vr_setup_hmd2].bg, false);
+		set(layer[vr_setup_fov2].bg, false);
+		set(layer[vr_setup_dst2].bg, false);
+		set(layer[vr_setup_d2k1].bg, false);
+		set(layer[vr_setup_d2k2].bg, false);
+		set(layer[vr_setup_d2k3].bg, false);
+		set(layer[vr_setup_d2k4].bg, false);
+		set(layer[vr_setup_vig2].bg, false);
+		set(layer[vr_setup_cac2].bg, false);
+		set(layer[vr_setup_olp2].bg, false);
 
 		set(layer[vr_setup_btn1].ondown, vr_setup_change_ondown(-1));
 		set(layer[vr_setup_btn2].ondown, vr_setup_change_ondown(+1));
-		set(selected_var_callback, null);
 
-		set(selected_var, %1);
+		set(vrs.setting, null);
+		set(vrs.var, %1);
+		set(vrs.var_value, null);
+		set(vrs.var_callback, null);
 
 		if(%1 == 'screen',
-			set(selected_setting, vr_setup_siz2);
-			set(selected_var_name, 'webvr.mobilevr_screensize');
-			set(selected_var_postfix, ' inch');
-			copy(selected_var_value, get(selected_var_name));
-			if(selected_var_value == 'auto', set(selected_var_value, 5.0));
-			set(selected_var_step, 0.1);
-			set(selected_var_min, 4);
-			set(selected_var_max, 10);
-			set(selected_var_round, 1);
-			set(selected_var_callback, vr_setup_change_screen());
+			set(vrs.setting, vr_setup_siz2);
+			set(vrs.var_name, 'webvr.mobilevr_screensize');
+			set(vrs.var_postfix, ' inch');
+			copy(vrs.var_value, get(vrs.var_name));
+			if(vrs.var_value == 'auto', set(vrs.var_value, 5.0));
+			set(vrs.var_step, 0.1);
+			set(vrs.var_min, 4);
+			set(vrs.var_max, 10);
+			set(vrs.var_round, 1);
+			set(vrs.var_callback, vr_setup_change_screen());
 		);
 
 		if(%1 == 'ipd',
-			set(selected_setting, vr_setup_ipd2);
-			set(selected_var_name, 'webvr.mobilevr_ipd');
-			set(selected_var_postfix, ' mm');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.1);
-			set(selected_var_min, 40);
-			set(selected_var_max, 80);
-			set(selected_var_round, 1);
+			set(vrs.setting, vr_setup_ipd2);
+			set(vrs.var_name, 'webvr.mobilevr_ipd');
+			set(vrs.var_postfix, ' mm');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.1);
+			set(vrs.var_min, 40);
+			set(vrs.var_max, 80);
+			set(vrs.var_round, 1);
 		);
 
 		if(%1 == 'headset_simple',
-			set(selected_setting, vr_setup_hmd4);
+			set(vrs.setting, vr_setup_hmd4);
 			set(layer[vr_setup_btn1].ondown, vr_setup_change_headset(-1));
 			set(layer[vr_setup_btn2].ondown, vr_setup_change_headset(+1));
 		);
 
 		if(%1 == 'headset',
-			set(selected_setting, vr_setup_hmd2);
+			set(vrs.setting, vr_setup_hmd2);
 			set(layer[vr_setup_btn1].ondown, vr_setup_change_headset(-1));
 			set(layer[vr_setup_btn2].ondown, vr_setup_change_headset(+1));
 		);
 
 		if(%1 == 'fov',
-			set(selected_setting, vr_setup_fov2);
-			set(selected_var_name, 'webvr.mobilevr_lens_fov');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.1);
-			set(selected_var_min, 40);
-			set(selected_var_max, 179);
-			set(selected_var_round, 1);
-			set(selected_var_callback, vr_setup_change_headset(0));
+			set(vrs.setting, vr_setup_fov2);
+			set(vrs.var_name, 'webvr.mobilevr_lens_fov');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.1);
+			set(vrs.var_min, 40);
+			set(vrs.var_max, 179);
+			set(vrs.var_round, 1);
+			set(vrs.var_callback, vr_setup_change_headset(0));
 		);
 
 		if(%1 == 'dist',
-			set(selected_setting, vr_setup_dst2);
-			set(selected_var_name, 'webvr.mobilevr_lens_dist');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.01);
-			set(selected_var_min, 0);
-			set(selected_var_max, 5);
-			set(selected_var_round, 2);
-			set(selected_var_callback, vr_setup_change_headset(0));
+			set(vrs.setting, vr_setup_dst2);
+			set(vrs.var_name, 'webvr.mobilevr_lens_dist');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.01);
+			set(vrs.var_min, 0);
+			set(vrs.var_max, 5);
+			set(vrs.var_round, 2);
+			set(vrs.var_callback, vr_setup_change_headset(0));
 		);
 
-		if(selected_var == 'dist2k1',
-			set(selected_setting, vr_setup_d2k1);
-			set(selected_var_name, 'i_dist2_k1');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.001);
-			set(selected_var_min, -9);
-			set(selected_var_max, +9);
-			set(selected_var_round, 3);
-			set(selected_var_callback, vr_setup_update_dist2());
+		if(%1 == 'dist2k1',
+			set(vrs.setting, vr_setup_d2k1);
+			set(vrs.var_name, 'webvr.vrsetup.i_dist2_k1');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.001);
+			set(vrs.var_min, -9);
+			set(vrs.var_max, +9);
+			set(vrs.var_round, 3);
+			set(vrs.var_callback, vr_setup_update_dist2());
 		);
 
-		if(selected_var == 'dist2k2',
-			set(selected_setting, vr_setup_d2k2);
-			set(selected_var_name, 'i_dist2_k2');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.001);
-			set(selected_var_min, -9);
-			set(selected_var_max, +9);
-			set(selected_var_round, 3);
-			set(selected_var_callback, vr_setup_update_dist2());
+		if(%1 == 'dist2k2',
+			set(vrs.setting, vr_setup_d2k2);
+			set(vrs.var_name, 'webvr.vrsetup.i_dist2_k2');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.001);
+			set(vrs.var_min, -9);
+			set(vrs.var_max, +9);
+			set(vrs.var_round, 3);
+			set(vrs.var_callback, vr_setup_update_dist2());
 		);
 
-		if(selected_var == 'dist2k3',
-			set(selected_setting, vr_setup_d2k3);
-			set(selected_var_name, 'i_dist2_k3');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.001);
-			set(selected_var_min, -9);
-			set(selected_var_max, +9);
-			set(selected_var_round, 3);
-			set(selected_var_callback, vr_setup_update_dist2());
+		if(%1 == 'dist2k3',
+			set(vrs.setting, vr_setup_d2k3);
+			set(vrs.var_name, 'webvr.vrsetup.i_dist2_k3');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.001);
+			set(vrs.var_min, -9);
+			set(vrs.var_max, +9);
+			set(vrs.var_round, 3);
+			set(vrs.var_callback, vr_setup_update_dist2());
 		);
 
-		if(selected_var == 'dist2k4',
-			set(selected_setting, vr_setup_d2k4);
-			set(selected_var_name, 'i_dist2_k4');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.001);
-			set(selected_var_min, -9);
-			set(selected_var_max, +9);
-			set(selected_var_round, 3);
-			set(selected_var_callback, vr_setup_update_dist2());
+		if(%1 == 'dist2k4',
+			set(vrs.setting, vr_setup_d2k4);
+			set(vrs.var_name, 'webvr.vrsetup.i_dist2_k4');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.001);
+			set(vrs.var_min, -9);
+			set(vrs.var_max, +9);
+			set(vrs.var_round, 3);
+			set(vrs.var_callback, vr_setup_update_dist2());
 		);
 
 		if(%1 == 'vignette',
-			set(selected_setting, vr_setup_vig2);
-			set(selected_var_name, 'webvr.mobilevr_lens_vign');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 1);
-			set(selected_var_min, 0);
-			set(selected_var_max, 100);
-			set(selected_var_round, 0);
-			set(selected_var_callback, vr_setup_change_headset(0));
+			set(vrs.setting, vr_setup_vig2);
+			set(vrs.var_name, 'webvr.mobilevr_lens_vign');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 1);
+			set(vrs.var_min, 0);
+			set(vrs.var_max, 100);
+			set(vrs.var_round, 0);
+			set(vrs.var_callback, vr_setup_change_headset(0));
 		);
 
-		if(selected_var == 'ca',
-			set(selected_setting, vr_setup_cac2);
-			set(selected_var_name, 'webvr.mobilevr_lens_ca');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.001);
-			set(selected_var_min, -1.0);
-			set(selected_var_max, +1.0);
-			set(selected_var_round, 3);
-			set(selected_var_callback, vr_setup_change_headset(0));
+		if(%1 == 'ca',
+			set(vrs.setting, vr_setup_cac2);
+			set(vrs.var_name, 'webvr.mobilevr_lens_ca');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.001);
+			set(vrs.var_min, -1.0);
+			set(vrs.var_max, +1.0);
+			set(vrs.var_round, 3);
+			set(vrs.var_callback, vr_setup_change_headset(0));
 		);
 
-		if(selected_var == 'overlap',
-			set(selected_setting, vr_setup_olp2);
-			set(selected_var_name, 'webvr.mobilevr_lens_overlap');
-			set(selected_var_postfix, '');
-			copy(selected_var_value, get(selected_var_name));
-			set(selected_var_step, 0.01);
-			set(selected_var_min, 0.5);
-			set(selected_var_max, 2.0);
-			set(selected_var_round, 2);
-			set(selected_var_callback, vr_setup_change_headset(0) );
+		if(%1 == 'overlap',
+			set(vrs.setting, vr_setup_olp2);
+			set(vrs.var_name, 'webvr.mobilevr_lens_overlap');
+			set(vrs.var_postfix, '');
+			copy(vrs.var_value, get(vrs.var_name));
+			set(vrs.var_step, 0.01);
+			set(vrs.var_min, 0.5);
+			set(vrs.var_max, 2.0);
+			set(vrs.var_round, 2);
+			set(vrs.var_callback, vr_setup_change_headset(0) );
 		);
 
-		if(selected_setting != null,
-			set(layer[get(selected_setting)].background, true);
+		if(vrs.setting != null,
+			set(layer[get(vrs.setting)].bg, true);
 			if(%2 == true,
-				set(layer[vr_setup_btn1].y, get(layer[get(selected_setting)].y));
-				set(layer[vr_setup_btn2].y, get(layer[get(selected_setting)].y));
+				set(layer[vr_setup_btn1].y, get(layer[get(vrs.setting)].y));
+				set(layer[vr_setup_btn2].y, get(layer[get(vrs.setting)].y));
 			,
-				tween(layer[vr_setup_btn1].y, get(layer[get(selected_setting)].y));
-				tween(layer[vr_setup_btn2].y, get(layer[get(selected_setting)].y));
+				tween(layer[vr_setup_btn1].y, get(layer[get(vrs.setting)].y));
+				tween(layer[vr_setup_btn2].y, get(layer[get(vrs.setting)].y));
 			);
 		);
 	</action>
@@ -1793,15 +1965,16 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 	</action>
 
 	<action name="vr_setup_adjust">
-		if(selected_setting != null,
-			mul(change, selected_var_step, %1);
-			add(selected_var_value, change);
-			Math.max(selected_var_value, selected_var_min);
-			Math.min(selected_var_value, selected_var_max);
-			roundval(selected_var_value, get(selected_var_round));
-			tween(get(selected_var_name), get(selected_var_value), 0.1);
-			txtadd(layer[get(selected_setting)].html, get(selected_var_value), get(selected_var_postfix));
-			if(selected_var_callback != null, selected_var_callback());
+		copy(vrs, webvr.vrsetup);
+		if(vrs.setting != null,
+			mul(change, vrs.var_step, %1);
+			add(vrs.var_value, change);
+			Math.max(vrs.var_value, vrs.var_min);
+			Math.min(vrs.var_value, vrs.var_max);
+			roundval(vrs.var_value, get(vrs.var_round));
+			tween(get(vrs.var_name), get(vrs.var_value), 0.1);
+			txtadd(layer[get(vrs.setting)].html, get(vrs.var_value), get(vrs.var_postfix));
+			if(vrs.var_callback != null, vrs.var_callback());
 		);
 	</action>
 
@@ -1824,7 +1997,10 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			copy(i_hscount, vrheadsets.headset.count);
 			for(set(vrheadj,0), vrheadj LT i_hscount, inc(vrheadj),
 				copy(hs, vrheadsets.headset[get(vrheadj)]);
-				if(i_fov == hs.fov AND i_dist == hs.dist AND i_vig == hs.vig AND i_overlap == hs.overlap AND i_dist2 == hs.dist2 AND i_ca == hs.ca, copy(i_hsindex, vrheadj); copy(i_headset, hs.caption););
+				if(i_fov == hs.fov AND i_dist == hs.dist AND i_vig == hs.vig AND i_overlap == hs.overlap AND i_dist2 == hs.dist2 AND i_ca == hs.ca,
+					copy(i_hsindex, vrheadj);
+					copy(i_headset, hs.caption);
+				);
 			);
 
 			if(%1 GT 0,
@@ -1845,7 +2021,6 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
 			copy(i_vig, hs.vig);
 			copy(i_ca, hs.ca);
 			copy(i_overlap, hs.overlap);
-
 		);
 
 		copy(layer[vr_setup_hmd2].html, i_headset);
@@ -1889,10 +2064,16 @@ posterurl="%FIRSTXML%/logo_animee_ifi_461/frame.jpg"
   <action name="onKUZ">if(keycode==17,set(tour_ctrlPressed,false););</action>
 
   <events name="sceneSeenEvents" onnewpano="changeSeenState" keep="true"/>
+  <krpano tour_nbseenscenes="0"/>
   <action name="changeSeenState">
     ifnot (scene[get(xml.scene)].seen,
       set(scene[get(xml.scene)].seen, true);
       events.dispatch(onSeenStateChanged);
+
+      inc(tour_nbseenscenes);
+      if (tour_nbseenscenes == scene.count,
+        events.dispatch(onallsceneseen);
+      );
     );
   </action>
 

@@ -4,6 +4,7 @@
 
   <data name="fr_project_title"><![CDATA[Test Insta360 titan]]></data>
   <data name="fr_project_author_name"><![CDATA[IFI]]></data>
+  <data name="fr_project_author_url"><![CDATA[http://www.ifi.vnu.edu.vn/fr/]]></data>
 
 
 
@@ -24,22 +25,32 @@
 
 
 
-  <data name="fr_controlBar_dockedThumbnailsprevSceneTip"><![CDATA[Panorama précédent]]></data>
-  <data name="fr_controlBar_dockedThumbnailsnextSceneTip"><![CDATA[Panorama suivant]]></data>
-  <data name="fr_controlBar_dockedThumbnailszoomInTip"><![CDATA[Zoom +]]></data>
-  <data name="fr_controlBar_dockedThumbnailszoomOutTip"><![CDATA[Zoom -]]></data>
-  <data name="fr_controlBar_dockedThumbnailsmoveLeftTip"><![CDATA[Déplacement vers la gauche]]></data>
-  <data name="fr_controlBar_dockedThumbnailsmoveRightTip"><![CDATA[Déplacement vers la droite]]></data>
-  <data name="fr_controlBar_dockedThumbnailsmoveUpTip"><![CDATA[Déplacement vers le haut]]></data>
-  <data name="fr_controlBar_dockedThumbnailsmoveDownTip"><![CDATA[Déplacement vers le bas]]></data>
-  <data name="fr_controlBar_dockedThumbnailsopenFsTip"><![CDATA[Plein écran]]></data>
-  <data name="fr_controlBar_dockedThumbnailscloseFsTip"><![CDATA[Quitter le plein écran]]></data>
-  <data name="fr_controlBar_dockedThumbnailsautorotateOnTip"><![CDATA[Démarrer l'Autorotation]]></data>
-  <data name="fr_controlBar_dockedThumbnailsautorotateOffTip"><![CDATA[Arrêter l'Autorotation]]></data>
-  <data name="fr_controlBar_dockedThumbnailsctrlmodeDragTip"><![CDATA[Changer le mode de navigation]]></data>
-  <data name="fr_controlBar_dockedThumbnailsctrlmodeMoveTip"><![CDATA[Changer le mode de navigation]]></data>
-  <data name="fr_prevnexttheme8prevSceneTip"><![CDATA[Scène précédente]]></data>
-  <data name="fr_prevnexttheme8nextSceneTip"><![CDATA[Scène suivante]]></data>
+  <data name="fr_prevnexttheme2prevSceneTip"><![CDATA[Previous Scene]]></data>
+  <data name="fr_prevnexttheme2nextSceneTip"><![CDATA[Next Scene]]></data>
+  <data name="fr_contextmenuopenFsLabel"><![CDATA[Enter Fullscreen]]></data>
+  <data name="fr_contextmenucloseFsLabel"><![CDATA[Exit Fullscreen]]></data>
+  <data name="fr_contextmenunormallabel"><![CDATA[Normal View]]></data>
+  <data name="fr_contextmenufisheyelabel"><![CDATA[Fisheye View]]></data>
+  <data name="fr_contextmenuarchitecturallabel"><![CDATA[Architectural View]]></data>
+  <data name="fr_contextmenulittleplanetlabel"><![CDATA[Little Planet View]]></data>
+  <data name="fr_controlBar_dpadprevSceneTip"><![CDATA[Panorama précédent]]></data>
+  <data name="fr_controlBar_dpadnextSceneTip"><![CDATA[Panorama suivant]]></data>
+  <data name="fr_controlBar_dpadzoomInTip"><![CDATA[Zoom +]]></data>
+  <data name="fr_controlBar_dpadzoomOutTip"><![CDATA[Zoom -]]></data>
+  <data name="fr_controlBar_dpadmoveLeftTip"><![CDATA[Déplacement vers la gauche]]></data>
+  <data name="fr_controlBar_dpadmoveRightTip"><![CDATA[Déplacement vers la droite]]></data>
+  <data name="fr_controlBar_dpadmoveUpTip"><![CDATA[Déplacement vers le haut]]></data>
+  <data name="fr_controlBar_dpadmoveDownTip"><![CDATA[Déplacement vers le bas]]></data>
+  <data name="fr_controlBar_dpadopenFsTip"><![CDATA[Plein écran]]></data>
+  <data name="fr_controlBar_dpadcloseFsTip"><![CDATA[Quitter le plein écran]]></data>
+  <data name="fr_controlBar_dpadautorotateOnTip"><![CDATA[Démarrer l'Autorotation]]></data>
+  <data name="fr_controlBar_dpadautorotateOffTip"><![CDATA[Arrêter l'Autorotation]]></data>
+  <data name="fr_controlBar_dpaddisplayHelpTip"><![CDATA[Afficher l'écran d'aide]]></data>
+  <data name="fr_controlBar_dpadhideHelpTip"><![CDATA[Masquer l'écran d'aide]]></data>
+  <data name="fr_controlBar_dpaddisplayControlsTip"><![CDATA[Afficher les contrôles]]></data>
+  <data name="fr_controlBar_dpadhideControlsTip"><![CDATA[Masquer les contrôles]]></data>
+  <data name="fr_controlBar_dpadctrlmodeDragTip"><![CDATA[Changer le mode de navigation]]></data>
+  <data name="fr_controlBar_dpadctrlmodeMoveTip"><![CDATA[Changer le mode de navigation]]></data>
   <data name="fr_logowebsiteurl"><![CDATA[http://www.ifi.vnu.edu.vn/fr/]]></data>
   <data name="fr_logotooltipText"><![CDATA[Ouvrir le site]]></data>
 

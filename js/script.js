@@ -12,6 +12,7 @@ var divcredit = document.getElementById("divcredit");
 var topleft = document.getElementById("topleft");
 var bottonmleft = document.getElementById("bottonmleft");
 
+
 credit.addEventListener("click", function(){
     if(divcredit.style.display === "none"){
         topleft.style.display = "none";
@@ -24,7 +25,6 @@ credit.addEventListener("click", function(){
         bottonmleft.style.display = "block";   
     }
 });
-
 micro.addEventListener("click", function(){
    
     if(micro.src === window.location.href + "/image/microff.png"){
